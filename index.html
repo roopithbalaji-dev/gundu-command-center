@@ -1,0 +1,2577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="GUNDU — Premium Personal Command Center for Amazon Shift Managers">
+<title>GUNDU ⚡ Personal Planning Command Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Outfit:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ========================================
+   THEME TOKENS — LIGHT ELEGANT EDITORIAL (DEFAULT)
+======================================== */
+:root {
+  --bg: #fbf8f3;
+  --bg2: #f4eee3;
+  --surface: #ffffff;
+  --surface2: #eae0d0;
+  --glass: rgba(255, 255, 255, 0.85);
+  --glass-h: rgba(255, 255, 255, 0.98);
+  --border: #e6ded1;
+  --border-h: #d4c7b3;
+  --accent: #d9534f;
+  --accent-dim: rgba(217, 83, 79, 0.12);
+  --rose: #c85a7c;
+  --rose-dim: rgba(200, 90, 124, 0.12);
+  --amber: #d97706;
+  --amber-dim: rgba(217, 119, 6, 0.12);
+  --sage: #2d6a4f;
+  --sage-dim: rgba(45, 106, 79, 0.12);
+  --blue: #2563eb;
+  --blue-dim: rgba(37, 99, 235, 0.12);
+  --purple: #7c3aed;
+  --purple-dim: rgba(124, 58, 237, 0.12);
+  --text: #2b2623;
+  --text-muted: #73675c;
+  --text-faint: #a39688;
+  --sidebar-w: 240px;
+  --topbar-h: 62px;
+  --r: 16px;
+  --r-sm: 10px;
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+  --shadow-hover: 0 14px 40px rgba(0, 0, 0, 0.08);
+  --t: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* DARK MODE OVERRIDE */
+body.dark-mode {
+  --bg: #0f1219;
+  --bg2: #161b26;
+  --surface: #1e2433;
+  --surface2: #272f42;
+  --glass: rgba(30, 36, 51, 0.7);
+  --glass-h: rgba(39, 47, 66, 0.9);
+  --border: rgba(255, 255, 255, 0.08);
+  --border-h: rgba(255, 255, 255, 0.16);
+  --text: #e8ecf4;
+  --text-muted: #8e9bb0;
+  --text-faint: #4e5a70;
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Outfit', 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  line-height: 1.5;
+  font-size: 14px;
+  transition: background var(--t), color var(--t);
+}
+
+h1, h2, h3, h4 { font-family: 'Playfair Display', Georgia, serif; }
+button { cursor: pointer; border: none; outline: none; font-family: 'Outfit', sans-serif; transition: all var(--t); }
+input, textarea, select { font-family: 'Outfit', sans-serif; outline: none; border: none; }
+a { text-decoration: none; color: inherit; }
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+/* ========================================
+   LAYOUT
+======================================== */
+.app { display: flex; min-height: 100vh; }
+
+/* ========================================
+   SIDEBAR
+======================================== */
+.sidebar {
+  width: var(--sidebar-w);
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  left: 0; top: 0; bottom: 0;
+  z-index: 100;
+  box-shadow: 2px 0 20px rgba(0,0,0,0.015);
+}
+
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 22px 22px 18px;
+  border-bottom: 1px solid var(--border);
+}
+.logo-icon { font-size: 24px; filter: drop-shadow(0 2px 8px var(--rose-dim)); }
+.logo-text {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700; font-size: 22px; letter-spacing: 2px;
+  background: linear-gradient(135deg, var(--rose), var(--accent));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.sidebar-user {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px; margin: 12px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r); cursor: pointer;
+  box-shadow: var(--shadow);
+}
+.sidebar-user:hover { border-color: var(--rose); transform: translateY(-1px); }
+.user-avatar {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--rose), var(--accent));
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 14px; color: #fff; flex-shrink: 0;
+  box-shadow: 0 4px 12px var(--rose-dim);
+}
+.user-name { font-size: 13px; font-weight: 600; }
+.user-role { font-size: 10px; color: var(--sage); font-weight: 500; }
+
+.nav-links { list-style: none; padding: 10px 12px; flex: 1; }
+.nav-links li { margin-bottom: 4px; }
+.nav-btn {
+  width: 100%; display: flex; align-items: center; gap: 11px;
+  padding: 11px 14px; border-radius: var(--r-sm);
+  background: transparent; color: var(--text-muted);
+  font-size: 13px; font-weight: 500; text-align: left;
+}
+.nav-btn:hover { background: var(--surface); color: var(--text); }
+.nav-btn.active {
+  background: var(--surface);
+  color: var(--rose); font-weight: 600;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+.nav-icon { font-size: 16px; width: 20px; text-align: center; }
+
+.sidebar-bottom { padding: 16px 14px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px; }
+.theme-toggle-btn {
+  width: 100%; padding: 10px 12px; border-radius: var(--r-sm);
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--text); font-size: 12px; font-weight: 500; text-align: left;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.theme-toggle-btn:hover { border-color: var(--border-h); }
+.settings-btn {
+  width: 100%; padding: 10px 12px; border-radius: var(--r-sm);
+  background: transparent; color: var(--text-muted); font-size: 12px; text-align: left;
+}
+.settings-btn:hover { background: var(--surface); color: var(--text); }
+
+/* ========================================
+   MAIN
+======================================== */
+.main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+
+/* ========================================
+   TOPBAR
+======================================== */
+.topbar {
+  height: var(--topbar-h); background: var(--glass);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 28px; position: sticky; top: 0; z-index: 50;
+}
+.topbar-left { display: flex; align-items: center; gap: 16px; }
+.clock {
+  font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700;
+  color: var(--text); letter-spacing: -0.5px;
+}
+.date-display { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+.german-btn {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 15px; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 20px; cursor: pointer; color: var(--amber); font-size: 12px; font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+}
+.german-btn:hover { border-color: var(--amber); transform: translateY(-1px); }
+.topbar-right { display: flex; align-items: center; gap: 10px; }
+.icon-btn {
+  width: 36px; height: 36px; border-radius: 50%; background: var(--surface);
+  border: 1px solid var(--border); font-size: 15px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--shadow);
+}
+.icon-btn:hover { border-color: var(--rose); color: var(--rose); transform: scale(1.05); }
+
+/* ========================================
+   TABS
+======================================== */
+.tab-content { display: none; padding: 28px; flex: 1; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
+.tab-content.active { display: block; }
+
+/* ========================================
+   SECTION HEADERS
+======================================== */
+.sec-title { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; margin-bottom: 4px; color: var(--text); }
+.sec-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 24px; }
+
+/* ========================================
+   CARDS & CONTAINERS
+======================================== */
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 22px;
+  box-shadow: var(--shadow); transition: all var(--t);
+}
+.card:hover { border-color: var(--border-h); box-shadow: var(--shadow-hover); }
+.card-title {
+  font-size: 11px; font-weight: 700; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px;
+}
+
+/* ========================================
+   TODAY TAB
+======================================== */
+.ego-banner {
+  background: linear-gradient(135deg, rgba(200,90,124,0.08), rgba(217,83,79,0.08));
+  border: 1px solid rgba(200,90,124,0.25);
+  border-radius: var(--r); padding: 20px 24px;
+  margin-bottom: 24px;
+  display: flex; align-items: flex-start; gap: 16px;
+  position: relative; overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.ego-banner::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--rose), var(--accent), var(--amber));
+}
+.ego-emoji { font-size: 36px; flex-shrink: 0; line-height: 1; }
+.ego-title { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 700; color: var(--rose); margin-bottom: 4px; }
+.ego-msg { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+
+.today-grid { display: grid; grid-template-columns: 1fr 320px; gap: 24px; }
+
+/* Timeline */
+.timeline-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.add-btn {
+  padding: 8px 16px; border-radius: var(--r-sm);
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--text); font-size: 12px; font-weight: 600;
+  box-shadow: var(--shadow);
+}
+.add-btn:hover { border-color: var(--rose); color: var(--rose); }
+
+.time-slot { display: flex; gap: 14px; align-items: flex-start; min-height: 54px; }
+.tl-label { width: 52px; font-size: 11px; font-weight: 600; color: var(--text-muted); text-align: right; flex-shrink: 0; padding-top: 12px; letter-spacing: 0.3px; }
+.tl-label.now { color: var(--rose); font-weight: 700; }
+.tl-line { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; padding-top: 12px; }
+.tl-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--bg2); border: 2px solid var(--border); flex-shrink: 0; }
+.tl-dot.now { background: var(--rose); border-color: var(--rose); box-shadow: 0 0 10px var(--rose); }
+.tl-connector { width: 2px; flex: 1; min-height: 28px; background: var(--border); }
+.tl-block { flex: 1; padding: 4px 0; }
+.tl-inner {
+  padding: 10px 16px; border-radius: var(--r-sm);
+  background: var(--surface); border: 1px solid var(--border);
+  font-size: 13px; display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; cursor: pointer; min-height: 40px; box-shadow: 0 2px 8px rgba(0,0,0,0.015);
+}
+.tl-inner:hover { border-color: var(--border-h); transform: translateX(2px); }
+.tl-inner.now { background: var(--rose-dim); border-color: rgba(200,90,124,0.35); }
+.tl-inner.past { opacity: 0.55; }
+.tl-inner.work-type { background: var(--blue-dim); border-color: rgba(37,99,235,0.2); }
+.tl-inner.learning-type { background: var(--sage-dim); border-color: rgba(45,106,79,0.2); }
+.tl-inner.yoga-type { background: var(--purple-dim); border-color: rgba(124,58,237,0.2); }
+.tl-text { flex: 1; font-size: 13px; font-weight: 500; }
+.tl-text.now { color: var(--rose); font-weight: 700; }
+.tl-tag { font-size: 9px; padding: 3px 8px; border-radius: 10px; background: var(--bg2); color: var(--text-muted); text-transform: uppercase; font-weight: 600; letter-spacing: 0.4px; }
+.tl-del { width: 22px; height: 22px; border-radius: 50%; background: transparent; color: var(--text-faint); font-size: 12px; display: flex; align-items: center; justify-content: center; opacity: 0; }
+.time-slot:hover .tl-del { opacity: 1; }
+.tl-del:hover { background: var(--accent-dim); color: var(--accent); }
+
+/* Right Column */
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+.stat-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--r-sm); padding: 12px; text-align: center; }
+.stat-val { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; }
+.stat-lbl { font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; margin-top: 3px; font-weight: 600; }
+
+.prog-bar { height: 6px; background: var(--bg2); border-radius: 6px; overflow: hidden; margin-top: 6px; }
+.prog-fill { height: 100%; border-radius: 6px; background: linear-gradient(90deg, var(--rose), var(--accent)); transition: width 0.5s ease; }
+
+.habit-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); cursor: pointer; }
+.habit-item:last-child { border-bottom: none; }
+.hcheck { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--border-h); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all var(--t); }
+.hcheck.done { background: var(--sage); border-color: var(--sage); }
+.hcheck.done::after { content: '✓'; color: #fff; font-size: 11px; font-weight: 700; }
+.habit-lbl { font-size: 13px; flex: 1; }
+.habit-lbl.done { text-decoration: line-through; color: var(--text-faint); }
+.habit-emoji { font-size: 15px; }
+.add-habit-btn { width: 100%; padding: 7px; border: 1px dashed var(--border); border-radius: var(--r-sm); background: transparent; color: var(--text-muted); font-size: 12px; margin-top: 10px; font-weight: 500; }
+.add-habit-btn:hover { border-color: var(--rose); color: var(--rose); }
+
+.meal-preview-item { padding: 8px 12px; background: var(--bg2); border-radius: var(--r-sm); font-size: 12px; margin-bottom: 6px; line-height: 1.4; border: 1px solid var(--border); }
+.meal-type-lbl { font-size: 10px; color: var(--text-muted); margin-bottom: 4px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+
+.mb-3 { margin-bottom: 16px; }
+
+/* ========================================
+   WEEK TAB
+======================================== */
+.week-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }
+.day-col { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; box-shadow: var(--shadow); }
+.day-col.today-day { border-color: var(--rose); }
+.day-col:hover { border-color: var(--border-h); }
+.day-head { padding: 12px 10px; border-bottom: 1px solid var(--border); text-align: center; background: var(--bg2); }
+.day-name-lbl { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-muted); }
+.day-num { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; margin-top: 2px; }
+.today-day .day-num { color: var(--rose); }
+.day-badge { font-size: 9px; color: var(--amber); font-weight: 600; margin-top: 2px; }
+.day-tasks-list { padding: 10px; min-height: 140px; }
+.day-task-item {
+  font-size: 11px; padding: 6px 9px; border-radius: 6px;
+  margin-bottom: 4px; background: var(--bg2);
+  border-left: 3px solid var(--accent); display: flex; align-items: center;
+  justify-content: space-between; gap: 4px; cursor: pointer;
+}
+.day-task-item.work { border-left-color: var(--blue); }
+.day-task-item.yoga { border-left-color: var(--purple); }
+.day-task-item.learn { border-left-color: var(--sage); }
+.day-task-txt { flex: 1; line-height: 1.3; font-weight: 500; }
+.day-task-del { opacity: 0; font-size: 10px; color: var(--text-faint); }
+.day-task-item:hover .day-task-del { opacity: 1; }
+.day-add-btn { width: 100%; padding: 6px 4px; background: transparent; border: 1px dashed var(--border); border-radius: 6px; color: var(--text-faint); font-size: 10px; font-weight: 500; text-align: center; }
+.day-add-btn:hover { background: var(--bg2); color: var(--text); }
+
+/* ========================================
+   MEALS TAB
+======================================== */
+.meals-layout { display: grid; grid-template-columns: 1fr 310px; gap: 24px; }
+.meal-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.gen-grocery-btn {
+  padding: 10px 20px; border-radius: var(--r-sm);
+  background: linear-gradient(135deg, var(--rose), var(--accent));
+  color: #fff; font-size: 13px; font-weight: 600;
+  box-shadow: 0 4px 14px var(--rose-dim);
+}
+.gen-grocery-btn:hover { opacity: 0.92; transform: translateY(-1px); }
+
+.meal-grid-table { width: 100%; border-collapse: collapse; background: var(--surface); border-radius: var(--r); overflow: hidden; border: 1px solid var(--border); box-shadow: var(--shadow); }
+.meal-grid-table th, .meal-grid-table td { border: 1px solid var(--border); }
+.meal-grid-table th { background: var(--bg2); padding: 10px 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); text-align: center; }
+.meal-type-cell { background: var(--bg2); padding: 10px 12px; text-align: right; font-size: 12px; font-weight: 700; color: var(--text-muted); white-space: nowrap; vertical-align: middle; }
+.meal-cell-inner { min-height: 70px; padding: 6px; }
+.meal-cell-inner.restricted { background: rgba(217,83,79,0.03); }
+.no-chicken-badge { font-size: 9px; color: var(--accent); background: var(--accent-dim); border-radius: 4px; padding: 2px 6px; margin-bottom: 4px; display: inline-block; font-weight: 600; }
+.meal-ta { width: 100%; background: transparent; color: var(--text); font-size: 11px; resize: none; min-height: 52px; line-height: 1.5; padding: 3px 5px; }
+.meal-ta::placeholder { color: var(--text-faint); }
+
+/* Grocery */
+.grocery-day-badge { font-size: 12px; color: var(--amber); font-weight: 600; }
+.grocery-cat { margin-bottom: 16px; }
+.grocery-cat-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-muted); margin-bottom: 8px; }
+.grocery-row { display: flex; align-items: center; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--border); cursor: pointer; }
+.grocery-row:last-child { border-bottom: none; }
+.g-check { width: 16px; height: 16px; border-radius: 4px; border: 2px solid var(--border-h); flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.g-check.done { background: var(--sage); border-color: var(--sage); }
+.g-check.done::after { content: '✓'; color: #fff; font-size: 9px; font-weight: 700; }
+.grocery-row.item-done .g-name { text-decoration: line-through; color: var(--text-faint); }
+.g-name { font-size: 12px; flex: 1; }
+.grocery-add { width: 100%; padding: 9px 12px; background: var(--bg2); border: 1px solid var(--border); border-radius: var(--r-sm); color: var(--text); font-size: 12px; margin-top: 10px; }
+.grocery-add::placeholder { color: var(--text-faint); }
+
+/* ========================================
+   GOALS TAB
+======================================== */
+.goals-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 18px; }
+.goal-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 22px; position: relative; overflow: hidden; box-shadow: var(--shadow); transition: all var(--t); }
+.goal-card:hover { border-color: var(--border-h); transform: translateY(-2px); box-shadow: var(--shadow-hover); }
+.goal-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; }
+.goal-card:nth-child(1)::before { background: linear-gradient(90deg, var(--rose), var(--accent)); }
+.goal-card:nth-child(2)::before { background: linear-gradient(90deg, var(--amber), #f59e0b); }
+.goal-card:nth-child(3)::before { background: linear-gradient(90deg, var(--sage), var(--blue)); }
+.goal-card:nth-child(4)::before { background: linear-gradient(90deg, var(--purple), #3b82f6); }
+.goal-card:nth-child(5)::before { background: linear-gradient(90deg, var(--blue), var(--sage)); }
+
+.goal-head { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.goal-icon { font-size: 30px; line-height: 1; }
+.goal-title { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 700; }
+.goal-pct { font-size: 11px; color: var(--text-muted); margin-top: 2px; font-weight: 500; }
+
+.goal-prog { height: 6px; background: var(--bg2); border-radius: 6px; overflow: hidden; margin-bottom: 16px; }
+.goal-prog-fill { height: 100%; border-radius: 6px; transition: width 0.5s ease; }
+.goal-card:nth-child(1) .goal-prog-fill { background: linear-gradient(90deg, var(--rose), var(--accent)); }
+.goal-card:nth-child(2) .goal-prog-fill { background: linear-gradient(90deg, var(--amber), #f59e0b); }
+.goal-card:nth-child(3) .goal-prog-fill { background: linear-gradient(90deg, var(--sage), var(--blue)); }
+.goal-card:nth-child(4) .goal-prog-fill { background: linear-gradient(90deg, var(--purple), #3b82f6); }
+.goal-card:nth-child(5) .goal-prog-fill { background: linear-gradient(90deg, var(--blue), var(--sage)); }
+
+.goal-task { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--border); cursor: pointer; }
+.goal-task:last-child { border-bottom: none; }
+.gt-check { width: 16px; height: 16px; border-radius: 4px; border: 2px solid var(--border-h); flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all var(--t); }
+.gt-check.done { background: var(--sage); border-color: var(--sage); }
+.gt-check.done::after { content: '✓'; color: #fff; font-size: 9px; font-weight: 700; }
+.goal-task.task-done .gt-text { text-decoration: line-through; color: var(--text-faint); }
+.gt-text { font-size: 12px; flex: 1; line-height: 1.4; }
+.add-task-inp { width: 100%; padding: 7px 10px; background: var(--bg2); border: 1px dashed var(--border); border-radius: var(--r-sm); color: var(--text); font-size: 11px; margin-top: 10px; }
+.add-task-inp:focus { border-color: var(--rose); border-style: solid; }
+.add-task-inp::placeholder { color: var(--text-faint); }
+
+/* ========================================
+   AI COACH TAB
+======================================== */
+.coach-layout { display: grid; grid-template-columns: 1fr 300px; gap: 20px; height: calc(100vh - var(--topbar-h) - 100px); }
+.chat-wrap { display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; box-shadow: var(--shadow); }
+.chat-head { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; background: var(--bg2); }
+.coach-av { width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, var(--rose), var(--purple)); display: flex; align-items: center; justify-content: center; font-size: 20px; box-shadow: 0 4px 12px var(--rose-dim); }
+.coach-name { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 700; }
+.coach-status { font-size: 11px; color: var(--sage); font-weight: 500; }
+
+.chat-msgs { flex: 1; overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+.msg { display: flex; gap: 10px; max-width: 86%; animation: fadeUp 0.3s ease; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+.msg.user { flex-direction: row-reverse; align-self: flex-end; }
+.msg-av { width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+.msg.assistant .msg-av { background: linear-gradient(135deg, var(--rose), var(--purple)); color: #fff; }
+.msg.user .msg-av { background: linear-gradient(135deg, var(--blue), var(--sage)); color: #fff; }
+.msg-bubble { padding: 11px 16px; border-radius: 14px; font-size: 13px; line-height: 1.6; }
+.msg.assistant .msg-bubble { background: var(--bg2); border: 1px solid var(--border); border-radius: 14px 14px 14px 2px; }
+.msg.user .msg-bubble { background: linear-gradient(135deg, rgba(200,90,124,0.15), rgba(124,58,237,0.15)); border: 1px solid rgba(200,90,124,0.25); border-radius: 14px 14px 2px 14px; }
+.msg-time { font-size: 10px; color: var(--text-faint); margin-top: 4px; padding: 0 4px; }
+
+.chat-input-row { padding: 12px 16px; border-top: 1px solid var(--border); display: flex; gap: 10px; align-items: flex-end; background: var(--surface); }
+.chat-ta { flex: 1; padding: 10px 14px; background: var(--bg2); border: 1px solid var(--border); border-radius: 20px; color: var(--text); font-size: 13px; resize: none; max-height: 100px; min-height: 42px; line-height: 1.4; }
+.chat-ta:focus { border-color: var(--rose); }
+.chat-ta::placeholder { color: var(--text-faint); }
+.send-btn { width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, var(--rose), var(--accent)); color: #fff; font-size: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 12px var(--rose-dim); }
+.send-btn:hover { opacity: 0.9; transform: scale(1.05); }
+.send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+.typing { display: flex; gap: 5px; padding: 11px 16px; background: var(--bg2); border: 1px solid var(--border); border-radius: 14px; width: fit-content; }
+.tdot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-muted); animation: bounce 1s infinite; }
+.tdot:nth-child(2) { animation-delay: 0.2s; }
+.tdot:nth-child(3) { animation-delay: 0.4s; }
+
+.api-card { background: linear-gradient(135deg, rgba(200,90,124,0.06), rgba(124,58,237,0.06)); border: 1px solid rgba(200,90,124,0.2); border-radius: var(--r); padding: 16px; margin-bottom: 14px; box-shadow: var(--shadow); }
+.api-card.connected { border-color: rgba(45,106,79,0.3); background: rgba(45,106,79,0.05); }
+.api-card h4 { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+.api-card p { font-size: 11px; color: var(--text-muted); line-height: 1.5; margin-bottom: 10px; }
+.api-inp { width: 100%; padding: 8px 12px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-sm); color: var(--text); font-size: 12px; margin-bottom: 8px; }
+.api-inp::placeholder { color: var(--text-faint); }
+.api-provider-sel { width: 100%; padding: 8px 12px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-sm); color: var(--text); font-size: 12px; margin-bottom: 8px; }
+.api-save-btn { width: 100%; padding: 9px; border-radius: var(--r-sm); background: linear-gradient(135deg, var(--rose), var(--accent)); color: #fff; font-size: 12px; font-weight: 600; }
+.api-save-btn:hover { opacity: 0.9; }
+
+.quick-prompt { width: 100%; padding: 8px 12px; background: var(--bg2); border: 1px solid var(--border); border-radius: var(--r-sm); color: var(--text-muted); font-size: 12px; cursor: pointer; margin-bottom: 6px; text-align: left; line-height: 1.4; font-weight: 500; }
+.quick-prompt:hover { background: var(--surface); color: var(--rose); border-color: var(--rose); }
+
+/* ========================================
+   NOTES TAB
+======================================== */
+.notes-layout { display: grid; grid-template-columns: 270px 1fr; gap: 20px; height: calc(100vh - var(--topbar-h) - 100px); }
+.new-note-btn { width: 100%; padding: 10px; border-radius: var(--r-sm); background: linear-gradient(135deg, var(--rose), var(--accent)); color: #fff; font-size: 13px; font-weight: 600; margin-bottom: 12px; box-shadow: 0 4px 12px var(--rose-dim); }
+.new-note-btn:hover { opacity: 0.9; }
+.note-list { overflow-y: auto; }
+.note-item { padding: 12px; border-radius: var(--r-sm); cursor: pointer; border: 1px solid transparent; margin-bottom: 4px; background: var(--surface); box-shadow: 0 2px 6px rgba(0,0,0,0.01); }
+.note-item:hover { border-color: var(--border); }
+.note-item.active { border-color: var(--rose); background: var(--bg2); }
+.note-item-title { font-weight: 600; font-size: 13px; margin-bottom: 2px; }
+.note-preview { font-size: 11px; color: var(--text-muted); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.note-date { font-size: 10px; color: var(--text-faint); margin-top: 4px; }
+.note-editor { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); display: flex; flex-direction: column; overflow: hidden; box-shadow: var(--shadow); }
+.note-editor-head { padding: 16px 22px; border-bottom: 1px solid var(--border); background: var(--bg2); }
+.note-title-inp { width: 100%; background: transparent; color: var(--text); font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; }
+.note-title-inp::placeholder { color: var(--text-faint); }
+.note-body-ta { flex: 1; width: 100%; background: transparent; color: var(--text); font-size: 14px; line-height: 1.8; padding: 22px; resize: none; }
+.note-body-ta::placeholder { color: var(--text-faint); }
+
+/* ========================================
+   MODALS
+======================================== */
+.modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(6px); z-index: 999; display: flex; align-items: center; justify-content: center; }
+.modal { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 30px; width: 460px; max-width: 90vw; max-height: 90vh; overflow-y: auto; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.15); }
+.modal-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; margin-bottom: 22px; }
+.mclose { position: absolute; top: 18px; right: 18px; width: 28px; height: 28px; border-radius: 50%; background: var(--bg2); color: var(--text-muted); font-size: 14px; display: flex; align-items: center; justify-content: center; }
+.mclose:hover { background: var(--border); color: var(--text); }
+.fgroup { margin-bottom: 16px; }
+.flabel { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px; display: block; }
+.finput { width: 100%; padding: 10px 14px; background: var(--bg2); border: 1px solid var(--border); border-radius: var(--r-sm); color: var(--text); font-size: 13px; }
+.finput:focus { border-color: var(--rose); }
+
+.day-sel { display: grid; grid-template-columns: repeat(7,1fr); gap: 6px; }
+.dsel-btn { padding: 8px 4px; border-radius: var(--r-sm); background: var(--bg2); border: 1px solid var(--border); color: var(--text-muted); font-size: 11px; text-align: center; cursor: pointer; font-weight: 600; }
+.dsel-btn:hover { background: var(--surface); color: var(--text); }
+.dsel-btn.sel { background: var(--rose-dim); border-color: var(--rose); color: var(--rose); }
+
+.save-btn { width: 100%; padding: 12px; border-radius: var(--r-sm); background: linear-gradient(135deg, var(--rose), var(--accent)); color: #fff; font-size: 14px; font-weight: 600; margin-top: 8px; box-shadow: 0 4px 14px var(--rose-dim); }
+.save-btn:hover { opacity: 0.92; }
+
+/* Block Modal */
+.block-modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(6px); z-index: 998; display: flex; align-items: center; justify-content: center; }
+.block-modal-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 26px; width: 380px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); }
+.block-modal-box h3 { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; margin-bottom: 16px; }
+.brow { display: flex; gap: 10px; margin-bottom: 12px; }
+.binput { flex: 1; padding: 9px 12px; background: var(--bg2); border: 1px solid var(--border); border-radius: var(--r-sm); color: var(--text); font-size: 13px; }
+.binput:focus { border-color: var(--rose); }
+.type-sel { display: flex; gap: 6px; margin-bottom: 16px; }
+.tsel-btn { flex: 1; padding: 7px; border-radius: var(--r-sm); background: var(--bg2); border: 1px solid var(--border); color: var(--text-muted); font-size: 11px; font-weight: 600; text-align: center; }
+.tsel-btn:hover { background: var(--surface); color: var(--text); }
+.tsel-btn.active { background: var(--rose-dim); border-color: var(--rose); color: var(--rose); }
+.bactions { display: flex; gap: 8px; }
+.bsave { flex: 1; padding: 10px; border-radius: var(--r-sm); background: linear-gradient(135deg, var(--rose), var(--accent)); color: #fff; font-size: 13px; font-weight: 600; }
+.bcancel { padding: 10px 16px; border-radius: var(--r-sm); background: var(--bg2); border: 1px solid var(--border); color: var(--text-muted); font-size: 13px; }
+
+/* ========================================
+   MASTER PIN LOCK SCREEN STYLES
+======================================== */
+.lock-screen-bg {
+  position: fixed; inset: 0;
+  background: var(--bg);
+  z-index: 99999;
+  display: flex; align-items: center; justify-content: center;
+  backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+  padding: 20px;
+  animation: fadeIn 0.3s ease;
+}
+.lock-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 36px 32px;
+  width: 380px; max-width: 95vw;
+  text-align: center;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.18);
+  position: relative;
+  overflow: hidden;
+}
+.lock-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+  background: linear-gradient(90deg, var(--rose), var(--accent), var(--amber));
+}
+.lock-icon { font-size: 42px; margin-bottom: 12px; line-height: 1; filter: drop-shadow(0 4px 12px var(--rose-dim)); }
+.lock-title { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.lock-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 24px; }
+.pin-input-wrap { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
+.pin-digit-inp {
+  width: 52px; height: 60px; border-radius: 14px;
+  background: var(--bg2); border: 2px solid var(--border);
+  text-align: center; font-size: 24px; font-weight: 700;
+  color: var(--text); font-family: 'Outfit', sans-serif;
+  transition: all var(--t);
+}
+.pin-digit-inp:focus { border-color: var(--rose); background: var(--surface); box-shadow: 0 0 12px var(--rose-dim); outline: none; }
+.pin-err-msg { font-size: 12px; color: var(--accent); font-weight: 600; min-height: 18px; margin-bottom: 16px; display: none; }
+.unlock-btn {
+  width: 100%; padding: 14px; border-radius: var(--r-sm);
+  background: linear-gradient(135deg, var(--rose), var(--accent));
+  color: #fff; font-size: 14px; font-weight: 600; cursor: pointer;
+  box-shadow: 0 4px 16px var(--rose-dim); transition: all var(--t);
+}
+.unlock-btn:hover { opacity: 0.92; transform: translateY(-1px); }
+.shake-anim { animation: shake 0.4s ease; }
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-8px); }
+  40%, 80% { transform: translateX(8px); }
+}
+
+/* Toast */
+.ego-toast {
+  position: fixed; top: 22px; right: 22px; z-index: 1000;
+  width: 340px; background: var(--surface);
+  border: 1px solid rgba(200,90,124,0.35);
+  border-radius: var(--r); padding: 16px;
+  box-shadow: 0 12px 40px rgba(200,90,124,0.18);
+  animation: slideRight 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+.ego-toast::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--rose), var(--accent), var(--amber)); }
+@keyframes slideRight { from{opacity:0;transform:translateX(80px)} to{opacity:1;transform:translateX(0)} }
+.toast-inner { display: flex; gap: 12px; align-items: flex-start; }
+.toast-icon-el { font-size: 26px; line-height: 1; }
+.toast-title-el { font-family: 'Playfair Display', serif; font-size: 14px; font-weight: 700; color: var(--rose); margin-bottom: 4px; }
+.toast-msg-el { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+.toast-x { position: absolute; top: 10px; right: 10px; background: none; color: var(--text-faint); font-size: 14px; }
+.toast-x:hover { color: var(--text); }
+
+/* German Popup */
+.german-popup {
+  position: fixed; top: 76px; left: 50%; transform: translateX(-50%);
+  z-index: 500; background: var(--surface); border: 1px solid rgba(217,119,6,0.3);
+  border-radius: var(--r); padding: 22px 28px;
+  box-shadow: 0 16px 50px rgba(0,0,0,0.12); text-align: center; min-width: 320px;
+  animation: fadeDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes fadeDown { from{opacity:0;transform:translateX(-50%) translateY(-10px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
+.gp-level { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--amber); margin-bottom: 4px; }
+.gp-word { font-family: 'Playfair Display', serif; font-size: 30px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.gp-trans { font-size: 16px; margin-bottom: 6px; color: var(--rose); font-weight: 600; }
+.gp-ex { font-size: 12px; color: var(--text-muted); font-style: italic; margin-bottom: 16px; line-height: 1.6; }
+.gp-close { background: var(--bg2); border: 1px solid var(--border); padding: 7px 18px; border-radius: 20px; color: var(--text); font-size: 12px; font-weight: 600; }
+.gp-close:hover { border-color: var(--amber); color: var(--amber); }
+
+/* Utilities */
+.flex { display: flex; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+
+/* Notes V3 & To-Do Grid */
+.notes-layout-v3 { display: grid; grid-template-columns: 240px 1fr 300px; gap: 18px; height: calc(100vh - var(--topbar-h) - 110px); }
+.notes-sidebar-col { display: flex; flex-direction: column; overflow: hidden; }
+.del-note-btn { background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(217,83,79,0.3); border-radius: var(--r-sm); padding: 5px 12px; font-size: 11px; font-weight: 600; cursor: pointer; }
+.del-note-btn:hover { background: var(--accent); color: #fff; }
+.note-item-wrap { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.note-del-x { color: var(--text-faint); font-size: 12px; padding: 2px 6px; border-radius: 4px; cursor: pointer; }
+.note-del-x:hover { background: var(--accent-dim); color: var(--accent); }
+
+/* To-Do Panel */
+.todo-panel { display: flex; flex-direction: column; overflow: hidden; padding: 18px; }
+.todo-count-badge { font-size: 10px; font-weight: 700; color: var(--rose); background: var(--rose-dim); padding: 2px 8px; border-radius: 10px; }
+.todo-input-row { display: flex; gap: 8px; margin-bottom: 14px; }
+.todo-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+.todo-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; background: var(--bg2); border: 1px solid var(--border); border-radius: var(--r-sm); transition: all var(--t); }
+.todo-item:hover { border-color: var(--border-h); }
+.todo-item.done .todo-txt { text-decoration: line-through; color: var(--text-faint); }
+.todo-txt { flex: 1; font-size: 12px; font-weight: 500; }
+.todo-del-btn { color: var(--text-faint); font-size: 11px; cursor: pointer; padding: 2px 6px; border-radius: 4px; border: none; background: transparent; }
+.todo-del-btn:hover { background: var(--accent-dim); color: var(--accent); }
+
+/* Edit Block Modal */
+.edit-btn-sm { font-size: 11px; color: var(--text-muted); cursor: pointer; padding: 2px 6px; border-radius: 4px; border: none; background: transparent; }
+.edit-btn-sm:hover { background: var(--rose-dim); color: var(--rose); }
+
+/* Meal Toolbar */
+.meal-toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+.mtool-btn { padding: 7px 12px; border-radius: var(--r-sm); background: var(--bg2); border: 1px solid var(--border); color: var(--text); font-size: 12px; font-weight: 500; cursor: pointer; transition: all var(--t); }
+.mtool-btn:hover { border-color: var(--rose); color: var(--rose); }
+.mtool-btn.primary { background: var(--rose-dim); border-color: var(--rose); color: var(--rose); font-weight: 600; }
+
+/* Option A Mobile Day Pills */
+.mobile-day-pills { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 14px; }
+.mobile-day-pill { padding: 8px 14px; border-radius: var(--r-sm); background: var(--surface); border: 1px solid var(--border); font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; color: var(--text-muted); }
+.mobile-day-pill.active { background: var(--rose-dim); border-color: var(--rose); color: var(--rose); box-shadow: var(--shadow); }
+.mobile-meal-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 18px; box-shadow: var(--shadow); }
+.mobile-meal-sec { margin-bottom: 16px; }
+.mobile-meal-sec:last-child { margin-bottom: 0; }
+.mobile-meal-lbl { font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between; }
+
+/* Grocery Controls */
+.grocery-actions-row { display: flex; gap: 6px; margin-top: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+.g-btn-sm { padding: 5px 10px; border-radius: var(--r-sm); background: var(--bg2); border: 1px solid var(--border); font-size: 11px; color: var(--text-muted); cursor: pointer; font-weight: 500; }
+.g-btn-sm:hover { border-color: var(--border-h); color: var(--text); }
+.g-item-actions { display: flex; align-items: center; gap: 4px; opacity: 0.7; }
+.grocery-row:hover .g-item-actions { opacity: 1; }
+.g-action-btn { background: none; border: none; font-size: 11px; color: var(--text-faint); cursor: pointer; padding: 2px 4px; border-radius: 4px; }
+.g-action-btn:hover { background: var(--accent-dim); color: var(--accent); }
+
+/* ========================================
+   MOBILE RESPONSIVE & FORCE MOBILE STYLING
+======================================== */
+/* ========================================
+   MOBILE RESPONSIVE & FORCE MOBILE STYLING
+======================================== */
+@media (max-width: 768px) {
+  body:not(.force-desktop) .app { flex-direction: column !important; }
+  body:not(.force-desktop) .sidebar {
+    width: 100% !important; height: auto !important; position: sticky !important; top: 0 !important; bottom: auto !important;
+    left: 0 !important; right: 0 !important;
+    border-right: none !important; border-bottom: 1px solid var(--border) !important;
+    flex-direction: column !important; padding: 8px 12px !important; z-index: 120 !important;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05) !important;
+  }
+  body:not(.force-desktop) .sidebar-user { display: none !important; }
+  body:not(.force-desktop) .sidebar-bottom { display: flex !important; flex-direction: row !important; justify-content: space-between !important; padding: 6px 0 !important; border-top: none !important; }
+  body:not(.force-desktop) .sidebar-logo { border-bottom: none !important; padding: 4px 0 !important; justify-content: space-between !important; width: 100% !important; }
+  body:not(.force-desktop) .nav-links {
+    display: flex !important; gap: 6px !important; padding: 4px 0 !important; overflow-x: auto !important; -webkit-overflow-scrolling: touch !important;
+    width: 100% !important; flex: initial !important; margin-top: 2px !important;
+  }
+  body:not(.force-desktop) .nav-links li { margin-bottom: 0 !important; flex-shrink: 0 !important; }
+  body:not(.force-desktop) .nav-btn {
+    padding: 7px 12px !important; font-size: 12px !important; white-space: nowrap !important; gap: 6px !important; border-radius: 20px !important;
+    background: var(--surface) !important; border: 1px solid var(--border) !important;
+  }
+  body:not(.force-desktop) .nav-btn.active {
+    background: var(--rose-dim) !important; border-color: var(--rose) !important; color: var(--rose) !important;
+  }
+  body:not(.force-desktop) .main { margin-left: 0 !important; width: 100% !important; min-height: auto !important; }
+  body:not(.force-desktop) .topbar { padding: 10px 14px !important; height: auto !important; flex-wrap: wrap !important; gap: 8px !important; }
+  body:not(.force-desktop) .clock { font-size: 18px !important; }
+  body:not(.force-desktop) .date-display { font-size: 11px !important; }
+  body:not(.force-desktop) .german-btn { font-size: 11px !important; padding: 4px 10px !important; }
+  body:not(.force-desktop) .tab-content { padding: 14px !important; }
+
+  body:not(.force-desktop) .today-grid { grid-template-columns: 1fr !important; gap: 16px !important; }
+  body:not(.force-desktop) .ego-banner { padding: 14px !important; gap: 10px !important; flex-direction: column !important; }
+  body:not(.force-desktop) .ego-emoji { font-size: 28px !important; }
+
+  body:not(.force-desktop) .meals-layout { grid-template-columns: 1fr !important; gap: 16px !important; }
+  body:not(.force-desktop) .meal-top { flex-direction: column !important; align-items: flex-start !important; gap: 10px !important; }
+
+  body:not(.force-desktop) .week-grid { grid-template-columns: 1fr !important; gap: 12px !important; }
+  body:not(.force-desktop) .goals-grid { grid-template-columns: 1fr !important; }
+  body:not(.force-desktop) .coach-mobile-tabs { display: flex !important; }
+  body:not(.force-desktop) .coach-layout {
+    grid-template-columns: 1fr !important; gap: 0 !important;
+    height: calc(100vh - var(--topbar-h) - 170px) !important;
+    min-height: 480px !important;
+  }
+  body:not(.force-desktop) .chat-wrap { height: 100% !important; display: flex !important; }
+  body:not(.force-desktop) .chat-wrap.hide-mobile { display: none !important; }
+  body:not(.force-desktop) .coach-sidebar { display: none !important; overflow-y: auto !important; height: 100% !important; }
+  body:not(.force-desktop) .coach-sidebar.show-mobile { display: flex !important; flex-direction: column !important; }
+  body:not(.force-desktop) .notes-layout-v3 { grid-template-columns: 1fr !important; height: auto !important; gap: 16px !important; }
+}
+
+/* Force Mobile Mode Overrides */
+body.force-mobile .app { flex-direction: column !important; }
+body.force-mobile .sidebar {
+  width: 100% !important; height: auto !important; position: sticky !important; top: 0 !important; bottom: auto !important;
+  left: 0 !important; right: 0 !important;
+  border-right: none !important; border-bottom: 1px solid var(--border) !important;
+  flex-direction: column !important; padding: 8px 12px !important; z-index: 120 !important;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05) !important;
+}
+body.force-mobile .sidebar-user { display: none !important; }
+body.force-mobile .sidebar-bottom { display: flex !important; flex-direction: row !important; justify-content: space-between !important; padding: 6px 0 !important; border-top: none !important; }
+body.force-mobile .sidebar-logo { border-bottom: none !important; padding: 4px 0 !important; justify-content: space-between !important; width: 100% !important; }
+body.force-mobile .nav-links {
+  display: flex !important; gap: 6px !important; padding: 4px 0 !important; overflow-x: auto !important; -webkit-overflow-scrolling: touch !important;
+  width: 100% !important; flex: initial !important; margin-top: 2px !important;
+}
+body.force-mobile .nav-links li { margin-bottom: 0 !important; flex-shrink: 0 !important; }
+body.force-mobile .nav-btn {
+  padding: 7px 12px !important; font-size: 12px !important; white-space: nowrap !important; gap: 6px !important; border-radius: 20px !important;
+  background: var(--surface) !important; border: 1px solid var(--border) !important;
+}
+body.force-mobile .nav-btn.active {
+  background: var(--rose-dim) !important; border-color: var(--rose) !important; color: var(--rose) !important;
+}
+body.force-mobile .main { margin-left: 0 !important; width: 100% !important; min-height: auto !important; }
+body.force-mobile .topbar { padding: 10px 14px !important; height: auto !important; flex-wrap: wrap !important; gap: 8px !important; }
+body.force-mobile .clock { font-size: 18px !important; }
+body.force-mobile .date-display { font-size: 11px !important; }
+body.force-mobile .german-btn { font-size: 11px !important; padding: 4px 10px !important; }
+body.force-mobile .tab-content { padding: 14px !important; }
+
+body.force-mobile .today-grid { grid-template-columns: 1fr !important; gap: 16px !important; }
+body.force-mobile .ego-banner { padding: 14px !important; gap: 10px !important; flex-direction: column !important; }
+body.force-mobile .ego-emoji { font-size: 28px !important; }
+
+body.force-mobile .meals-layout { grid-template-columns: 1fr !important; gap: 16px !important; }
+body.force-mobile .meal-top { flex-direction: column !important; align-items: flex-start !important; gap: 10px !important; }
+
+body.force-mobile .week-grid { grid-template-columns: 1fr !important; gap: 12px !important; }
+body.force-mobile .goals-grid { grid-template-columns: 1fr !important; }
+body.force-mobile .coach-mobile-tabs { display: flex !important; }
+body.force-mobile .coach-layout {
+  grid-template-columns: 1fr !important; gap: 0 !important;
+  height: calc(100vh - var(--topbar-h) - 170px) !important;
+  min-height: 480px !important;
+}
+body.force-mobile .chat-wrap { height: 100% !important; display: flex !important; }
+body.force-mobile .chat-wrap.hide-mobile { display: none !important; }
+body.force-mobile .coach-sidebar { display: none !important; overflow-y: auto !important; height: 100% !important; }
+body.force-mobile .coach-sidebar.show-mobile { display: flex !important; flex-direction: column !important; }
+body.force-mobile .notes-layout-v3 { grid-template-columns: 1fr !important; height: auto !important; gap: 16px !important; }
+
+/* ========================================
+   AI COACH MOBILE TABS & HOTEL MENU STYLES
+======================================== */
+.coach-mobile-tabs { display: none; gap: 8px; margin-bottom: 12px; }
+.c-mtab {
+  flex: 1; padding: 9px 12px; border-radius: var(--r-sm);
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--text-muted); font-size: 12px; font-weight: 600; text-align: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+}
+.c-mtab.active {
+  background: var(--rose-dim); border-color: var(--rose); color: var(--rose);
+}
+.coach-settings-pill {
+  margin-left: auto; padding: 5px 11px; border-radius: 14px;
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--text-muted); font-size: 11px; font-weight: 600; cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+}
+.coach-settings-pill:hover { border-color: var(--rose); color: var(--rose); }
+
+.hotel-menu-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 28px;
+  width: 780px;
+  max-width: 92vw;
+  max-height: 88vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
+}
+.hm-header { text-align: center; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+.hm-badge { font-size: 10px; font-weight: 700; letter-spacing: 2px; color: var(--amber); text-transform: uppercase; margin-bottom: 6px; }
+.hm-title { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700; color: var(--rose); margin-bottom: 4px; }
+.hm-sub { font-size: 12px; color: var(--text-muted); }
+
+.hm-nav { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 12px; }
+.hm-nav-btn {
+  flex: 1; padding: 10px 14px; border-radius: var(--r-sm);
+  background: var(--bg2); border: 1px solid var(--border);
+  color: var(--text-muted); font-size: 12px; font-weight: 600; cursor: pointer; text-align: center;
+}
+.hm-nav-btn.active {
+  background: linear-gradient(135deg, rgba(200,90,124,0.12), rgba(217,119,6,0.12));
+  border-color: var(--rose); color: var(--rose); box-shadow: var(--shadow);
+}
+
+.hm-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 16px; }
+.hm-card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 18px; position: relative;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.02); transition: transform var(--t);
+}
+.hm-card:hover { transform: translateY(-2px); border-color: var(--rose); }
+.hm-card-title {
+  font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 700;
+  color: var(--text); margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px dashed var(--border); padding-bottom: 8px;
+}
+.hm-item { display: flex; align-items: center; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid rgba(0,0,0,0.03); font-size: 12px; cursor: pointer; }
+.hm-item:last-child { border-bottom: none; }
+.hm-item-name { font-weight: 500; display: flex; align-items: center; gap: 8px; }
+.hm-item.done .hm-item-name { text-decoration: line-through; color: var(--text-faint); }
+.hm-item-tag { font-size: 10px; padding: 2px 7px; border-radius: 10px; background: var(--surface); color: var(--sage); font-weight: 600; }
+
+.hm-footer { display: flex; justify-content: space-between; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border); }
+.hm-foot-btn { padding: 9px 18px; border-radius: var(--r-sm); background: var(--bg2); border: 1px solid var(--border); font-size: 12px; font-weight: 600; cursor: pointer; }
+.hm-foot-btn.primary { background: linear-gradient(135deg, var(--rose), var(--accent)); color: #fff; border: none; box-shadow: 0 4px 12px var(--rose-dim); }
+
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-icon">⚡</span>
+      <span class="logo-text">GUNDU</span>
+    </div>
+    <div class="sidebar-user" onclick="openSettings()">
+      <div class="user-avatar" id="ua">G</div>
+      <div>
+        <div class="user-name" id="un">My Profile</div>
+        <div class="user-role" id="ur">🟢 Amazon Late Shift (1:20 PM - 1:00 AM)</div>
+      </div>
+    </div>
+    <ul class="nav-links">
+      <li><button class="nav-btn active" onclick="showTab('today',this)"><span class="nav-icon">📅</span> Today</button></li>
+      <li><button class="nav-btn" onclick="showTab('week',this)"><span class="nav-icon">🗓️</span> Week</button></li>
+      <li><button class="nav-btn" onclick="showTab('meals',this)"><span class="nav-icon">🥗</span> Meal Plan</button></li>
+      <li><button class="nav-btn" onclick="showTab('goals',this)"><span class="nav-icon">🎯</span> My Goals</button></li>
+      <li><button class="nav-btn" onclick="showTab('coach',this)"><span class="nav-icon">🤖</span> AI Coach</button></li>
+      <li><button class="nav-btn" onclick="showTab('notes',this)"><span class="nav-icon">📝</span> Notes & To-Do</button></li>
+    </ul>
+    <div class="sidebar-bottom">
+      <button class="theme-toggle-btn" onclick="toggleTheme()">
+        <span id="theme-lbl">☀️ Light Mode</span>
+        <span id="theme-icon">🌙 Switch</span>
+      </button>
+      <button class="settings-btn" onclick="openSettings()">⚙️ Settings</button>
+      <button class="settings-btn" onclick="lockApp()" style="color:var(--rose)">🔒 Lock Dashboard</button>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main">
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="clock" id="clock">00:00</div>
+        <div class="date-display" id="ddate">Loading...</div>
+      </div>
+      <button class="german-btn" onclick="showGermanPopup()">
+        🇩🇪 B2 German <span id="gword-short">Wort des Tages</span>
+      </button>
+      <div class="topbar-right">
+        <button class="icon-btn" onclick="lockApp()" title="Lock Dashboard 🔒">🔒</button>
+        <button class="icon-btn" onclick="triggerEgo()" title="Ego Push 🔥">🔔</button>
+      </div>
+    </div>
+
+    <!-- TODAY -->
+    <div class="tab-content active" id="tab-today">
+      <div class="ego-banner" id="ego-banner">
+        <div class="ego-emoji" id="ego-em">🔥</div>
+        <div>
+          <div class="ego-title" id="ego-ttl">Today's Focus</div>
+          <div class="ego-msg" id="ego-msg">Loading your daily mission...</div>
+        </div>
+      </div>
+      <div class="today-grid">
+        <div>
+          <div class="timeline-head">
+            <div>
+              <div class="sec-title">Today's Schedule</div>
+              <div class="sec-sub" id="today-sec-sub">Free Time: 9:00 AM – 1:20 PM • Amazon Shift: 1:20 PM – 1:00 AM</div>
+            </div>
+            <button class="add-btn" onclick="openBlockModal()">+ Add Activity</button>
+          </div>
+          <div class="card"><div class="timeline" id="timeline"></div></div>
+        </div>
+        <div>
+          <div class="card mb-3">
+            <div class="card-title">📊 Today's Progress</div>
+            <div class="stats-grid">
+              <div class="stat-card"><div class="stat-val" id="s-habits" style="color:var(--sage)">0/0</div><div class="stat-lbl">Habits</div></div>
+              <div class="stat-card"><div class="stat-val" id="s-free" style="color:var(--amber)">3.5h</div><div class="stat-lbl">Free Time</div></div>
+              <div class="stat-card"><div class="stat-val" id="s-goals" style="color:var(--purple)">0%</div><div class="stat-lbl">Goals Done</div></div>
+              <div class="stat-card"><div class="stat-val" id="s-streak" style="color:var(--rose)">0🔥</div><div class="stat-lbl">Streak</div></div>
+            </div>
+            <div class="card-title" style="margin-top:14px">Day Completion</div>
+            <div class="prog-bar"><div class="prog-fill" id="day-prog" style="width:0%"></div></div>
+          </div>
+          <div class="card mb-3">
+            <div class="card-title">✅ Daily Habits</div>
+            <div id="habit-list"></div>
+            <button class="add-habit-btn" onclick="addHabit()">+ Add habit</button>
+          </div>
+          <div class="card">
+            <div class="card-title">🍽️ Today's Meals</div>
+            <div id="today-meals-preview"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WEEK -->
+    <div class="tab-content" id="tab-week">
+      <div class="week-header">
+        <div>
+          <div class="sec-title">This Week</div>
+          <div class="sec-sub">Mon–Fri: Amazon Shift (1:20 PM – 1:00 AM) • Sat–Sun: Yoga (10–11 AM) & Rest</div>
+        </div>
+      </div>
+      <div class="week-grid" id="week-grid"></div>
+    </div>
+
+    <!-- MEALS -->
+    <div class="tab-content" id="tab-meals">
+      <div class="meal-top">
+        <div>
+          <div class="sec-title">🥗 Weekly Meal Plan</div>
+          <div class="sec-sub">Healthy & Fit • Chicken allowed Mon/Tue/Wed/Fri/Sat • Strictly No Chicken on Thu & Sun</div>
+        </div>
+        <div class="meal-toolbar">
+          <button class="mtool-btn" onclick="clearAllMeals()">🗑️ Clear All Meals</button>
+          <button class="mtool-btn" onclick="saveDefaultMeals()">💾 Save as Default</button>
+          <button class="mtool-btn" onclick="resetDefaultMeals()">↺ Reset Default</button>
+          <button class="mtool-btn primary" onclick="syncMealsToGrocery()">🛒 Sync to Grocery</button>
+          <button class="mtool-btn" onclick="openGroceryMenuModal()">📖 Hotel Menu View</button>
+        </div>
+      </div>
+      <div class="meals-layout">
+        <div>
+          <div id="meal-table-container">
+            <table class="meal-grid-table" id="meal-table"></table>
+          </div>
+        </div>
+        <div class="card">
+          <div class="flex items-center justify-between mb-3">
+            <div class="card-title" style="margin-bottom:0">🛒 Grocery List</div>
+            <div class="grocery-day-badge" id="g-day-badge">📅 Wednesday</div>
+          </div>
+          <div class="grocery-actions-row">
+            <button class="g-btn-sm" onclick="clearCheckedGrocery()">🧹 Clear Checked</button>
+            <button class="g-btn-sm" onclick="addGroceryCategory()">+ Add Category</button>
+          </div>
+          <div id="grocery-list"></div>
+          <input class="grocery-add" type="text" placeholder="+ Add item manually..." id="grocery-manual" onkeydown="if(event.key==='Enter')manualGrocery()">
+        </div>
+      </div>
+    </div>
+
+    <!-- GOALS -->
+    <div class="tab-content" id="tab-goals">
+      <div class="sec-title">🎯 My 5 Big Goals</div>
+      <div class="sec-sub">Check off tasks as you complete them • Focused on your career, German B2/C1, and life.</div>
+      <div class="goals-grid" id="goals-grid"></div>
+    </div>
+
+    <!-- COACH -->
+    <div class="tab-content" id="tab-coach">
+      <div class="sec-title">🤖 AI Personal Coach</div>
+      <div class="sec-sub" style="margin-bottom:14px">Powered by OpenRouter. Your tough-love coach holds you accountable.</div>
+      <div class="coach-mobile-tabs" id="coach-mobile-tabs">
+        <button class="c-mtab active" id="cmtab-chat" onclick="switchCoachTab('chat', this)">💬 Coach Chat</button>
+        <button class="c-mtab" id="cmtab-sidebar" onclick="openCoachSettingsModal()">⚡ Model & Prompts</button>
+      </div>
+      <div class="coach-layout">
+        <div class="chat-wrap">
+          <div class="chat-head">
+            <div class="coach-av">🤖</div>
+            <div>
+              <div class="coach-name">GUNDU Coach</div>
+              <div class="coach-status">🟢 Online — Direct & Honest Accountability</div>
+            </div>
+            <button class="coach-settings-pill" onclick="openCoachSettingsModal()" title="Model & Prompts">⚙️ Model & Prompts</button>
+          </div>
+          <div class="chat-msgs" id="chat-msgs"></div>
+          <div class="chat-input-row">
+            <textarea class="chat-ta" id="chat-in" placeholder="Ask your coach anything..." rows="1"
+              onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg()}"
+              oninput="autoH(this)"></textarea>
+            <button class="send-btn" onclick="sendMsg()" id="send-btn">➤</button>
+          </div>
+        </div>
+        <div class="coach-sidebar">
+          <div class="api-card connected" id="api-card">
+            <h4 id="api-status-title">✅ MISTRAL AI Connected & Active!</h4>
+            <p id="api-status-sub">Your AI Coach is ready using Mistral AI.</p>
+            <div style="margin-top:10px;margin-bottom:4px;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px">Select AI Provider</div>
+            <select class="api-provider-sel" id="api-provider" onchange="switchProvider(this.value)">
+              <option value="mistral">Mistral AI (api.mistral.ai)</option>
+              <option value="openrouter">OpenRouter (openrouter.ai)</option>
+              <option value="openai">OpenAI (api.openai.com)</option>
+            </select>
+            <div style="margin-top:6px;margin-bottom:4px;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px">API Key</div>
+            <input class="api-inp" type="password" id="api-key" placeholder="API key...">
+            <button class="api-save-btn" onclick="saveKey()">Save & Activate ⚡</button>
+          </div>
+          <div class="card">
+            <div class="card-title">Quick Coaching Prompts</div>
+            <button class="quick-prompt" onclick="qp('I have 3.5 hours before my 1:20 PM Amazon shift. Give me a step-by-step plan for B2 German & Master thesis right now.')">⚡ Plan my morning before 1:20 PM shift</button>
+            <button class="quick-prompt" onclick="qp('Give me a B2/C1 German workplace exercise for an Amazon Shift Manager leading a team meeting in Straubing.')">🇩🇪 B2 German leadership practice</button>
+            <button class="quick-prompt" onclick="qp('I am feeling tired before my shift. Give me an ego push to stop making excuses.')">🔥 Ego Push / Reality Check</button>
+            <button class="quick-prompt" onclick="qp('What leadership strategy should I apply today during my shift to manage warehouse conflict?')">👑 Leadership strategy for work</button>
+            <button class="quick-prompt" onclick="qp('Review my 5 goals and tell me how to spend 30 minutes on my driving theory today.')">🚗 Driving license action plan</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NOTES & TO-DO -->
+    <div class="tab-content" id="tab-notes">
+      <div class="sec-title">📝 Notes & To-Do Center</div>
+      <div class="sec-sub" style="margin-bottom:18px">Organize shift reflections, study notes, and daily tasks with full edit & delete support.</div>
+      <div class="notes-layout-v3">
+        <div class="notes-sidebar-col">
+          <button class="new-note-btn" onclick="newNote()">+ New Note</button>
+          <div class="note-list" id="note-list"></div>
+        </div>
+        <div class="note-editor">
+          <div class="note-editor-head">
+            <input class="note-title-inp" id="note-title" placeholder="Note title..." oninput="saveNote()">
+            <button class="del-note-btn" onclick="deleteCurrentNote()" title="Delete Note">🗑️ Delete Note</button>
+          </div>
+          <textarea class="note-body-ta" id="note-body" placeholder="Write your thoughts, shift reflections, or study summaries..." oninput="saveNote()"></textarea>
+        </div>
+        <div class="todo-panel card">
+          <div class="flex items-center justify-between mb-3">
+            <div class="card-title" style="margin-bottom:0">✅ Daily To-Do List</div>
+            <span class="todo-count-badge" id="todo-count">0 tasks</span>
+          </div>
+          <div class="todo-input-row">
+            <input class="finput" type="text" id="todo-in" placeholder="+ Add new task..." onkeydown="if(event.key==='Enter')addTodo()">
+            <button class="add-btn" onclick="addTodo()" style="background:var(--rose);color:#fff;border:none">+ Add</button>
+          </div>
+          <div class="todo-list" id="todo-list"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="modal-bg" id="settings-modal" style="display:none">
+  <div class="modal">
+    <button class="mclose" onclick="closeSettings()">✕</button>
+    <div class="modal-title">⚙️ My Settings</div>
+    <div class="fgroup"><label class="flabel">Your Name</label><input class="finput" id="s-name" placeholder="Your name..."></div>
+    <div class="fgroup"><label class="flabel">Amazon Shift Schedule (Mon–Fri)</label><input class="finput" type="text" id="s-shift-str" value="1:20 PM – 1:00 AM (incl. travel/food)"></div>
+    <div class="fgroup"><label class="flabel">Wake Up Time</label><input class="finput" type="time" id="s-wake" value="09:00"></div>
+    <div class="fgroup"><label class="flabel">Display View Mode</label>
+      <select class="finput" id="s-view-mode">
+        <option value="auto">Auto (Responsive Device Detect)</option>
+        <option value="mobile">📱 Mobile View (Force Option A Layout)</option>
+        <option value="desktop">💻 Desktop View (Force 8-Col Layout)</option>
+      </select>
+    </div>
+    <div class="fgroup"><label class="flabel">Grocery Shopping Day</label>
+      <div class="day-sel" id="day-sel">
+        <button class="dsel-btn" data-d="monday" onclick="selDay(this)">Mon</button>
+        <button class="dsel-btn" data-d="tuesday" onclick="selDay(this)">Tue</button>
+        <button class="dsel-btn sel" data-d="wednesday" onclick="selDay(this)">Wed</button>
+        <button class="dsel-btn" data-d="thursday" onclick="selDay(this)">Thu</button>
+        <button class="dsel-btn" data-d="friday" onclick="selDay(this)">Fri</button>
+        <button class="dsel-btn" data-d="saturday" onclick="selDay(this)">Sat</button>
+        <button class="dsel-btn" data-d="sunday" onclick="selDay(this)">Sun</button>
+      </div>
+    </div>
+    <div class="fgroup"><label class="flabel">Ego Notifications</label>
+      <select class="finput" id="s-notif">
+        <option value="on">ON — Push me hard! 🔥</option>
+        <option value="off">OFF — Gentle mode</option>
+      </select>
+    </div>
+    <div class="fgroup"><label class="flabel">Master PIN Lock Security</label>
+      <select class="finput" id="s-pin-enabled">
+        <option value="on">🔒 Enabled (PIN Required on Launch)</option>
+        <option value="off">🔓 Disabled (Open Access)</option>
+      </select>
+    </div>
+    <div class="fgroup"><label class="flabel">Set 4-Digit Master PIN</label>
+      <input class="finput" type="password" id="s-pin-code" maxlength="4" placeholder="Enter 4-digit PIN (default: 1234)">
+    </div>
+    <button class="save-btn" onclick="saveSettings()">💾 Save Settings</button>
+  </div>
+</div>
+
+<!-- MASTER PIN LOCK OVERLAY -->
+<div class="lock-screen-bg" id="lock-screen" style="display:none">
+  <div class="lock-card" id="lock-card">
+    <div class="lock-icon">🔒</div>
+    <div class="lock-title">GUNDU Command Center</div>
+    <div class="lock-sub">Enter your 4-digit Master PIN to unlock</div>
+    <div class="pin-input-wrap">
+      <input type="password" maxlength="1" class="pin-digit-inp" id="pin-1" oninput="pinNext(1)" onkeydown="pinBack(event,1)" autocomplete="off">
+      <input type="password" maxlength="1" class="pin-digit-inp" id="pin-2" oninput="pinNext(2)" onkeydown="pinBack(event,2)" autocomplete="off">
+      <input type="password" maxlength="1" class="pin-digit-inp" id="pin-3" oninput="pinNext(3)" onkeydown="pinBack(event,3)" autocomplete="off">
+      <input type="password" maxlength="1" class="pin-digit-inp" id="pin-4" oninput="pinNext(4)" onkeydown="pinBack(event,4)" autocomplete="off">
+    </div>
+    <div class="pin-err-msg" id="pin-err-msg">❌ Incorrect PIN. Please try again.</div>
+    <button class="unlock-btn" onclick="submitPin()">Unlock Dashboard ⚡</button>
+  </div>
+</div>
+
+<!-- ADD BLOCK MODAL -->
+<div class="block-modal-bg" id="block-modal" style="display:none">
+  <div class="block-modal-box">
+    <h3>📌 Add Activity to Schedule</h3>
+    <div class="brow">
+      <input class="binput" type="time" id="b-time" value="10:00" style="max-width:100px">
+      <input class="binput" type="text" id="b-label" placeholder="Activity name...">
+    </div>
+    <div class="type-sel">
+      <button class="tsel-btn active" data-t="personal" onclick="selBType(this)">Personal</button>
+      <button class="tsel-btn" data-t="work" onclick="selBType(this)">Work</button>
+      <button class="tsel-btn" data-t="learning" onclick="selBType(this)">Learning</button>
+      <button class="tsel-btn" data-t="yoga" onclick="selBType(this)">Yoga/Health</button>
+    </div>
+    <div class="bactions">
+      <button class="bsave" onclick="saveBlock()">Add Block</button>
+      <button class="bcancel" onclick="closeBlock()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- EGO TOAST -->
+<div class="ego-toast" id="ego-toast" style="display:none">
+  <button class="toast-x" onclick="closeToast()">✕</button>
+  <div class="toast-inner">
+    <div class="toast-icon-el" id="t-icon">🔥</div>
+    <div>
+      <div class="toast-title-el" id="t-title">Accountability Check!</div>
+      <div class="toast-msg-el" id="t-msg">Stay focused on your goals.</div>
+    </div>
+  </div>
+</div>
+
+<!-- GERMAN POPUP B2/C1 -->
+<div class="german-popup" id="german-popup" style="display:none">
+  <div class="gp-level">B2 / C1 Deutsch für Führungskräfte</div>
+  <div class="gp-word" id="gp-word">Die Personalführung</div>
+  <div class="gp-trans" id="gp-trans">Personnel Leadership / Management</div>
+  <div class="gp-ex" id="gp-ex">Effektive Personalführung erfordert Empathie und klare Kommunikation. (Effective leadership requires empathy and clear communication.)</div>
+  <button class="gp-close" onclick="closeGP()">Verstanden ✓</button>
+</div>
+
+<!-- HOTEL MENU GROCERY MODAL -->
+<div class="modal-bg" id="grocery-menu-modal" style="display:none">
+  <div class="hotel-menu-box">
+    <button class="mclose" onclick="closeGroceryMenuModal()">✕</button>
+    <div class="hm-header">
+      <div class="hm-badge">✨ GUNDU BISTRO & KITCHEN ✨</div>
+      <div class="hm-title">Chef's Weekly Grocery & Meal Selection</div>
+      <div class="hm-sub">Curated for Peak Energy & Shift Fitness • Straubing Command Center</div>
+    </div>
+    <div class="hm-nav">
+      <button class="hm-nav-btn active" id="hmnav-grocery" onclick="switchHotelMenuTab('grocery', this)">🛒 Grocery Card List</button>
+      <button class="hm-nav-btn" id="hmnav-meals" onclick="switchHotelMenuTab('meals', this)">🥗 Weekly Gourmet Plan</button>
+    </div>
+    <div class="hm-body" id="hm-body"></div>
+    <div class="hm-footer">
+      <button class="hm-foot-btn" onclick="window.print()">🖨️ Print Menu</button>
+      <button class="hm-foot-btn primary" onclick="closeGroceryMenuModal()">Close Menu ✓</button>
+    </div>
+  </div>
+</div>
+
+<!-- COACH SETTINGS & PROMPTS MODAL -->
+<div class="modal-bg" id="coach-settings-modal" style="display:none">
+  <div class="modal" style="width:480px">
+    <button class="mclose" onclick="closeCoachSettingsModal()">✕</button>
+    <div class="modal-title">⚙️ AI Model & Quick Prompts</div>
+    <div class="api-card connected" id="modal-api-card">
+      <h4 id="modal-api-status-title">✅ MISTRAL AI Connected & Active!</h4>
+      <p id="modal-api-status-sub">Your AI Coach is ready using Mistral AI.</p>
+      <div style="margin-top:10px;margin-bottom:4px;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px">Select AI Provider</div>
+      <select class="api-provider-sel" id="modal-api-provider" onchange="switchProvider(this.value)">
+        <option value="mistral">Mistral AI (api.mistral.ai)</option>
+        <option value="openrouter">OpenRouter (openrouter.ai)</option>
+        <option value="openai">OpenAI (api.openai.com)</option>
+      </select>
+      <div style="margin-top:6px;margin-bottom:4px;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px">API Key</div>
+      <input class="api-inp" type="password" id="modal-api-key" placeholder="API key...">
+      <button class="api-save-btn" onclick="saveModalKey()">Save & Activate ⚡</button>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <div class="card-title">⚡ Quick Coaching Prompts</div>
+      <button class="quick-prompt" onclick="qpModal('I have 3.5 hours before my 1:20 PM Amazon shift. Give me a step-by-step plan for B2 German & Master thesis right now.')">⚡ Plan my morning before 1:20 PM shift</button>
+      <button class="quick-prompt" onclick="qpModal('Give me a B2/C1 German workplace exercise for an Amazon Shift Manager leading a team meeting in Straubing.')">🇩🇪 B2 German leadership practice</button>
+      <button class="quick-prompt" onclick="qpModal('I am feeling tired before my shift. Give me an ego push to stop making excuses.')">🔥 Ego Push / Reality Check</button>
+      <button class="quick-prompt" onclick="qpModal('What leadership strategy should I apply today during my shift to manage warehouse conflict?')">👑 Leadership strategy for work</button>
+      <button class="quick-prompt" onclick="qpModal('Review my 5 goals and tell me how to spend 30 minutes on my driving theory today.')">🚗 Driving license action plan</button>
+    </div>
+  </div>
+</div>
+
+<script>
+
+// ============================================================
+//   GUNDU COMMAND CENTER V3 JS — B2 GERMAN & LIGHT ELEGANT THEME
+// ============================================================
+
+const GERMAN_B2 = [
+  {w:'die Personalführung',t:'Personnel Leadership',e:'Effektive Personalführung erfordert Empathie und klare Zielvorgaben. (Effective leadership requires empathy and clear objectives.)'},
+  {w:'die Schichtübergabe',t:'Shift Handover',e:'Eine präzise Schichtübergabe vermeidet Missverständnisse im Team. (A precise shift handover avoids misunderstandings in the team.)'},
+  {w:'die Konfliktlösung',t:'Conflict Resolution',e:'Als Schichtleiterin ist Konfliktlösung eine Schlüsselkompetenz. (As a shift manager, conflict resolution is a key competence.)'},
+  {w:'die Verhandlungsführung',t:'Negotiation Skills',e:'Die Verhandlungsführung erfordert Fingerspitzengefühl. (Negotiation requires tact and sensitivity.)'},
+  {w:'der Prozessablauf',t:'Process Workflow',e:'Wir optimieren den Prozessablauf in der Logistik. (We are optimizing the process workflow in logistics.)'},
+  {w:'die Entscheidungsfähigkeit',t:'Decision-Making Ability',e:'Entscheidungsfähigkeit unter Druck kennzeichnet eine gute Führungskraft. (Decision-making ability under pressure defines a good leader.)'},
+  {w:'die Verantwortungsübernahme',t:'Taking Responsibility',e:'Verantwortungsübernahme schafft Vertrauen im gesamten Lager. (Taking responsibility builds trust across the warehouse.)'},
+  {w:'die Zeitmanagement-Strategie',t:'Time Management Strategy',e:'Eine gute Zeitmanagement-Strategie nutzt den Vormittag optimal. (A good time management strategy uses the morning optimally.)'},
+  {w:'das Mitarbeitergespräch',t:'Employee Review Meeting',e:'Das jährliche Mitarbeitergespräch fördert die Motivation. (The annual employee review fosters motivation.)'},
+  {w:'die Arbeitszeiteinteilung',t:'Work Schedule Organization',e:'Die Arbeitszeiteinteilung von 13:20 bis 01:00 Uhr verlangt Disziplin. (The shift schedule from 13:20 to 01:00 requires discipline.)'},
+  {w:'die Zielerreichung',t:'Goal Achievement',e:'Konsequente Zielerreichung ist der Weg zum Masterabschluss. (Consistent goal achievement is the path to finishing the Master degree.)'},
+  {w:'die Eigenverantwortung',t:'Self-Responsibility',e:'Eigenverantwortung bedeutet: keine Ausreden mehr. (Self-responsibility means: no more excuses.)'},
+  {w:'die Weiterbildungsmaßnahme',t:'Professional Training',e:'Ich nutze meine freie Zeit für Weiterbildungsmaßnahmen. (I use my free time for professional development.)'},
+  {w:'die Leistungsbeurteilung',t:'Performance Evaluation',e:'Faire Leistungsbeurteilung motiviert das Schichtteam. (Fair performance evaluation motivates the shift team.)'},
+  {w:'das Durchsetzungsvermögen',t:'Assertiveness',e:'Durchsetzungsvermögen verbindet Klarheit mit Respekt. (Assertiveness combines clarity with respect.)'},
+];
+
+const EGO_MSGS = [
+  {e:'⚡',t:'09:00 AM — Morning Window Open!',m:'You have 4 hours before your 1:20 PM Amazon shift. This is YOUR time for B2 German, your Master thesis, and your future. Don not scroll it away.'},
+  {e:'👑',t:'Leader Mindset Check',m:'You lead a team at Amazon Straubing. If you can manage an entire warehouse shift, you can manage 45 minutes of thesis writing today. No excuses.'},
+  {e:'🇩🇪',t:'B2 German Reality Check',m:'B2 German will not become C1 by wishing. You need 30 minutes of advanced German practice every single morning. Do it right now!'},
+  {e:'📚',t:'Master Thesis Reminder',m:'Every day you put off your thesis, your future self pays the penalty. Write one page before 1:20 PM.'},
+  {e:'🚗',t:'Driving License Progress',m:'30 minutes of driving theory today = one step closer to complete independence on the road.'},
+  {e:'🧘',t:'Weekend Priority',m:'Saturday and Sunday yoga (10:00–11:00 AM) is YOUR sacred recovery time. No cooking, no chores — focus purely on your mental and physical strength.'},
+  {e:'🥗',t:'Diet Integrity Check',m:'Remember: Healthy eating is your energy foundation. Chicken is allowed today, but Thu and Sun are strictly vegetarian/no-chicken days.'},
+];
+
+const NOTIF_SCHED = [
+  {h:9,m:0,e:'☀️',t:'09:00 AM Mission Start',msg:'Good morning! Your 3.5-hour morning free time window is officially open. Plan your study and thesis now.'},
+  {h:9,m:30,e:'🇩🇪',t:'09:30 AM German B2 Time',msg:'Time for 30 mins of B2 German practice. Leadership terms, grammar, or news.'},
+  {h:10,m:30,e:'📚',t:'10:30 AM Thesis and AI Focus',msg:'Dedicated focus block: Work on Master degree thesis or AI tools.'},
+  {h:12,m:30,e:'🥗',t:'12:30 PM Lunch and Prep',msg:'Enjoy a healthy meal. Get ready for your Amazon shift.'},
+  {h:13,m:20,e:'🏭',t:'01:20 PM Amazon Shift Starts',msg:'Shift schedule begins (1:20 PM – 1:00 AM including commute and dinner). Lead with confidence!'},
+  {h:1,m:0,e:'🌙',t:'01:00 AM Home and Sleep',msg:'Shift and travel finished. Decompress, reflect, and get quality rest.'},
+];
+
+const WEEKEND_SCHED = [
+  {h:9,m:45,e:'🧘',t:'15 Min to Yoga Class!',msg:'Yoga starts at 10:00 AM! Grab your mat. Rest day, zero chores, 100% self-investment.'},
+  {h:11,m:15,e:'🌟',t:'Post-Yoga Energy',msg:'Yoga complete! Spend the afternoon reading, learning, or relaxing. No cooking or house chores today.'},
+];
+
+// ---- STATE ----
+
+// ---- API KEYS STORE ----
+const KEYS = {
+  mistral: '8mDXcih91zbl6M68tGLLsduY7iCBpjef',
+  openrouter: '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'
+};
+
+let S = {
+  theme:'light',
+  user:{name:'Manager',shiftStr:'1:20 PM – 1:00 AM',wakeUp:'09:00',groceryDay:'wednesday',notifications:'on',viewMode:'auto'},
+  habits:[
+    {id:1,lbl:'Morning Routine & Hydration (30 min)',em:'🌅',done:false},
+    {id:2,lbl:'B2 German Advanced Study (30 min)',em:'🇩🇪',done:false},
+    {id:3,lbl:'Master Thesis / Research (45 min)',em:'🎓',done:false},
+    {id:4,lbl:'AI Tool Skill Building (20 min)',em:'🤖',done:false},
+    {id:5,lbl:'Driving Theory Study (20 min)',em:'🚗',done:false},
+    {id:6,lbl:'Healthy Meal Plan Commitment',em:'🥗',done:false},
+    {id:7,lbl:'Weekend Yoga / Evening Stretch',em:'🧘',done:false},
+  ],
+  todayBlocks:[],
+  weekExtra:{monday:[],tuesday:[],wednesday:[],thursday:[],friday:[],saturday:[],sunday:[]},
+  goals:[
+    {id:1,icon:'👑',title:'Learn to Lead',tasks:[
+      {id:1,text:'Apply 1 warehouse conflict resolution technique at Amazon',done:false},
+      {id:2,text:'Read 1 chapter of a female leadership book',done:false},
+      {id:3,text:'Conduct 1 effective 1-on-1 shift handover meeting',done:false},
+      {id:4,text:'Practice confident communication under pressure',done:false},
+    ]},
+    {id:2,icon:'🇩🇪',title:'Master B2/C1 German',tasks:[
+      {id:1,text:'Study 15 advanced business/logistics vocabulary words',done:false},
+      {id:2,text:'Complete 1 B2 German grammar exercise',done:false},
+      {id:3,text:'Listen to 1 German podcast (ZDF / Tagesschau)',done:false},
+      {id:4,text:'Write a 100-word German summary of a work situation',done:false},
+    ]},
+    {id:3,icon:'🤖',title:'Master AI Tools',tasks:[
+      {id:1,text:'Use AI to summarize a research paper or document',done:false},
+      {id:2,text:'Learn 1 new AI workflow for work productivity',done:false},
+      {id:3,text:'Practice writing structured prompts for OpenRouter',done:false},
+      {id:4,text:'Explore automated task tools',done:false},
+    ]},
+    {id:4,icon:'🎓',title:"Finish Master's Degree",tasks:[
+      {id:1,text:'Write 1 page or section of Master thesis',done:false},
+      {id:2,text:'Read & summarize 2 academic literature papers',done:false},
+      {id:3,text:'Send weekly status update to academic supervisor',done:false},
+      {id:4,text:'Finalize bibliography & references section',done:false},
+    ]},
+    {id:5,icon:'🚗',title:'Get Driving License',tasks:[
+      {id:1,text:'Complete 2 online driving theory practice exams',done:false},
+      {id:2,text:'Review difficult traffic sign questions',done:false},
+      {id:3,text:'Schedule upcoming practical driving lesson',done:false},
+      {id:4,text:'Practice parallel parking mental steps',done:false},
+    ]},
+  ],
+  meals:{
+    monday:   {bf:'Greek Yogurt Bowl + Fresh Berries & Honey',ln:'Grilled Chicken & Avocado Salad Bowl',dn:'Chicken Stir-fry + Quinoa & Roasted Veggies (Pre-Shift Meal)'},
+    tuesday:  {bf:'Scrambled Eggs + Avocado & Whole Grain Toast',ln:'Warm Quinoa & Sweet Potato Power Bowl',dn:'Baked Lemon Herb Chicken + Broccoli & Rice'},
+    wednesday:{bf:'Overnight Protein Oats + Banana & Almonds',ln:'Chicken & Spinach Whole Wheat Wrap',dn:'Grilled Chicken Breast + Sweet Potato & Fresh Salad'},
+    thursday: {bf:'Blush Smoothie Bowl (Berries & Chia)',ln:'🌱 Creamy Red Lentil & Vegetable Soup',dn:'🌱 Tofu & Veggie Curry + Brown Rice (No Chicken)'},
+    friday:   {bf:'Greek Yogurt + Granola & Sliced Peaches',ln:'Chicken Tortilla Soup + Green Salad',dn:'Grilled Chicken Tikka + Raita & Whole Wheat Pita'},
+    saturday: {bf:'Acai Berry Smoothie Bowl + Almond Butter',ln:'Healthy Avocado & Egg Toast / Leftovers',dn:'Baked Salmon / Chicken + Roasted Asparagus'},
+    sunday:   {bf:'Fluffy Oats & Banana Protein Pancakes',ln:'Fresh Mediterranean Garden Salad + Eggs',dn:'🌱 Pasta Primavera with Fresh Herbs & Veggies (No Chicken)'},
+  },
+  defaultMeals:null,
+  grocery:[
+    {cat:'🥩 Healthy Protein',items:[
+      {n:'Chicken Breast (800g)',c:false},{n:'Organic Eggs — 12 pack',c:false},
+      {n:'Greek Yogurt (2 large tubs)',c:false},{n:'Firm Tofu (200g)',c:false},{n:'Protein Powder (Vanilla/Berry)',c:false}
+    ]},
+    {cat:'🥦 Fresh Produce',items:[
+      {n:'Frozen Mixed Organic Berries',c:false},{n:'Bananas (6)',c:false},
+      {n:'Baby Spinach & Wild Rocket',c:false},{n:'Broccoli & Asparagus',c:false},
+      {n:'Sweet Potatoes (3)',c:false},{n:'Avocados (3)',c:false},
+      {n:'Cucumber & Cherry Tomatoes',c:false},{n:'Bell Peppers (3 colors)',c:false},
+      {n:'Lemons & Lime',c:false},{n:'Frozen Acai Packs',c:false}
+    ]},
+    {cat:'🌾 Grains & Complex Carbs',items:[
+      {n:'Brown Rice & Quinoa',c:false},{n:'Whole Grain Seeded Bread',c:false},
+      {n:'Rolled Oats & Granola',c:false},{n:'Whole Wheat Wraps',c:false},
+      {n:'Whole Grain Pasta',c:false},{n:'Red Lentils (200g)',c:false}
+    ]},
+    {cat:'🧴 Pantry & Wellness',items:[
+      {n:'Extra Virgin Olive Oil',c:false},{n:'Low Sodium Soy Sauce',c:false},
+      {n:'Raw Organic Honey',c:false},{n:'Raw Almonds & Walnuts',c:false},
+      {n:'Chia Seeds & Flaxseeds',c:false},{n:'Almond Milk (Unsweetened 1L)',c:false}
+    ]},
+  ],
+  notes:[],
+  todos:[
+    {id:1,txt:'Review B2 German vocabulary list',done:false},
+    {id:2,txt:'Write 1 page of Master thesis',done:false},
+    {id:3,txt:'Complete 1 driving theory test',done:false}
+  ],
+  chatHistory:[],
+  currentNote:null,
+  provider:'mistral',
+  streak:0,
+  lastDate:null,
+  pin:'1234',
+  pinEnabled:true,
+  isUnlocked:false,
+};
+
+// ---- STORAGE & THEME ----
+function save(){localStorage.setItem('gundu_v3',JSON.stringify(S));}
+function load(){
+  const d=localStorage.getItem('gundu_v3');
+  if(!d)return;
+  try{
+    const p=JSON.parse(d);
+    Object.keys(p).forEach(k=>{if(k in S)S[k]=p[k];});
+  }catch(e){}
+}
+
+function applyTheme(){
+  if(S.theme==='dark'){
+    document.body.classList.add('dark-mode');
+    document.getElementById('theme-lbl').textContent='🌙 Dark Mode';
+    document.getElementById('theme-icon').textContent='☀️ Switch Light';
+  } else {
+    document.body.classList.remove('dark-mode');
+    document.getElementById('theme-lbl').textContent='☀️ Light Mode';
+    document.getElementById('theme-icon').textContent='🌙 Switch Dark';
+  }
+}
+function toggleTheme(){
+  S.theme=S.theme==='dark'?'light':'dark';
+  save();applyTheme();
+}
+
+// ---- CLOCK ----
+function tickClock(){
+  const n=new Date();
+  const h=String(n.getHours()).padStart(2,'0'),m=String(n.getMinutes()).padStart(2,'0');
+  document.getElementById('clock').textContent=`${h}:${m}`;
+  const ds=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const ms=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  document.getElementById('ddate').textContent=`${ds[n.getDay()]}, ${n.getDate()} ${ms[n.getMonth()]} ${n.getFullYear()}`;
+}
+
+// ---- TABS ----
+function showTab(id,btn){
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  if(btn)btn.classList.add('active');
+}
+
+// ---- GERMAN B2 ----
+function dayWordB2(){
+  const d=Math.floor((Date.now()-new Date(new Date().getFullYear(),0,0))/86400000);
+  return GERMAN_B2[d%GERMAN_B2.length];
+}
+function updateGermanBtn(){
+  const w=dayWordB2();
+  document.getElementById('gword-short').textContent=w.w;
+}
+function showGermanPopup(){
+  const w=dayWordB2();
+  document.getElementById('gp-word').textContent=w.w;
+  document.getElementById('gp-trans').textContent='🇬🇧 '+w.t;
+  document.getElementById('gp-ex').textContent='📖 '+w.e;
+  document.getElementById('german-popup').style.display='block';
+}
+function closeGP(){document.getElementById('german-popup').style.display='none';}
+
+// ---- EGO PUSH ----
+
+
+function triggerEgo(){
+  const m=EGO_MSGS[Math.floor(Math.random()*EGO_MSGS.length)];
+  showToast(m.e,m.t,m.m);
+  if('Notification'in window&&Notification.permission==='granted')new Notification(m.t,{body:m.m});
+}
+function showToast(em,title,msg){
+  document.getElementById('t-icon').textContent=em;
+  document.getElementById('t-title').textContent=title;
+  document.getElementById('t-msg').textContent=msg;
+  const t=document.getElementById('ego-toast');
+  t.style.display='block';
+  t.style.animation='none';t.offsetHeight;t.style.animation='slideRight 0.4s ease';
+  clearTimeout(window._toastTimer);
+  window._toastTimer=setTimeout(closeToast,9000);
+}
+function closeToast(){document.getElementById('ego-toast').style.display='none';}
+
+function checkNotifs(){
+  if(S.user.notifications!=='on')return;
+  const n=new Date(),h=n.getHours(),m=n.getMinutes(),d=n.getDay();
+  const isWE=d===0||d===6;
+  const sched=isWE?WEEKEND_SCHED:NOTIF_SCHED;
+  sched.forEach(s=>{if(s.h===h&&s.m===m){showToast(s.e,s.t,s.msg);if('Notification'in window&&Notification.permission==='granted')new Notification(s.t,{body:s.msg});}});
+}
+
+// ---- TODAY BANNER ----
+function renderEgoBanner(){
+  const n = new Date();
+  const d = n.getDay();
+  const isWE = d === 0 || d === 6;
+  const dayName = d === 0 ? 'Sunday' : (d === 6 ? 'Saturday' : 'Weekday');
+  const h = n.getHours();
+  let m;
+  
+  if (isWE) {
+    if (h < 10) m = {e:'🧘', t:`09:00 AM — ${dayName} Focus & Recovery Window!`, m:`Good morning! Today is ${dayName} — No Amazon shift. Focus on Yoga (10:00 AM), B2 German practice, your Master thesis, and personal rest.`};
+    else if (h < 12) m = EGO_MSGS[5]; // Weekend priority
+    else m = {e:'✨', t:`${dayName} Self-Growth & Recharge`, m:'Enjoy your weekend! Practice German vocabulary, write your thesis section, and recharge your energy. No shift work today.'};
+  } else {
+    if(h<10)m=EGO_MSGS[0];
+    else if(h<13)m=EGO_MSGS[1];
+    else if(h<14)m=EGO_MSGS[2];
+    else m=EGO_MSGS[Math.floor(Math.random()*EGO_MSGS.length)];
+  }
+  document.getElementById('ego-em').textContent=m.e;
+  document.getElementById('ego-ttl').textContent=m.t;
+  document.getElementById('ego-msg').textContent=m.m;
+}
+
+// ---- TIMELINE ----
+function renderTimeline(){
+  const tl=document.getElementById('timeline');
+  const n=new Date();
+  const d=n.getDay(),isWE=d===0||d===6;
+  const now=`${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;
+  const def=isWE?[
+    {t:'09:00',l:'😴 Gentle Wake Up & Hydration',ty:'personal'},
+    {t:'10:00',l:'🧘 YOGA CLASS — 100% Focus on Self',ty:'yoga'},
+    {t:'11:15',l:'🎯 Self Development / Reading Time',ty:'learning'},
+    {t:'12:30',l:'🍽️ Healthy Lunch — Stick to Meal Plan',ty:'personal'},
+    {t:'14:00',l:'📚 B2 German / Thesis Review',ty:'learning'},
+    {t:'18:00',l:'🌿 Evening Walk & Relax',ty:'personal'},
+    {t:'22:30',l:'😴 Sleep Prep & Wind Down',ty:'personal'},
+  ]:[
+    {t:S.user.wakeUp||'09:00',l:'☀️ Wake Up & Morning Routine',ty:'personal'},
+    {t:'09:30',l:'🥗 Nourishing Healthy Breakfast',ty:'personal'},
+    {t:'09:50',l:'📚 DEEP WORK: B2 German / Thesis / AI',ty:'learning'},
+    {t:'12:30',l:'🍽️ Healthy Pre-Shift Lunch',ty:'personal'},
+    {t:'13:20',l:'🏭 AMAZON SHIFT (Work, Travel & Commute)',ty:'work'},
+    {t:'01:00',l:'🏠 Shift & Travel Finished — Rest',ty:'personal'},
+  ];
+  const all=[...def,...S.todayBlocks].sort((a,b)=>a.t.localeCompare(b.t));
+  tl.innerHTML=all.map((b,i)=>{
+    const isNow=now>=b.t&&(i===all.length-1||now<all[i+1]?.t);
+    const isPast=now>b.t&&!isNow;
+    const isUser=S.todayBlocks.some(tb=>tb.t===b.t&&tb.l===b.l);
+    return`<div class="time-slot">
+      <div class="tl-label${isNow?' now':''}">${b.t}</div>
+      <div class="tl-line"><div class="tl-dot${isNow?' now':''}"></div><div class="tl-connector"></div></div>
+      <div class="tl-block"><div class="tl-inner ${isNow?'now':''} ${isPast?'past':''} ${b.ty}-type">
+        <span class="tl-text${isNow?' now':''}">${isNow?'▶ ':''}${b.l}</span>
+        <span class="tl-tag">${b.ty}</span>
+        <button class="edit-btn-sm" onclick="openEditBlock(event,'${b.t}','${b.l}','${b.ty}')" title="Edit Activity">✏️</button>
+        ${isUser?`<button class="tl-del" onclick="delBlock(event,'${b.t}','${b.l}')" title="Delete Activity">✕</button>`:''}
+      </div></div>
+    </div>`;
+  }).join('');
+}
+
+function delBlock(e,t,l){
+  e.stopPropagation();
+  S.todayBlocks=S.todayBlocks.filter(b=>!(b.t===t&&b.l===l));
+  save();renderTimeline();
+}
+
+
+function openEditBlock(e, t, l, ty){
+  if(e) e.stopPropagation();
+  document.getElementById('eb-original-time').value = t;
+  document.getElementById('eb-original-label').value = l;
+  document.getElementById('eb-time').value = t;
+  document.getElementById('eb-label').value = l;
+  document.querySelectorAll('.edit-type-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.t === ty);
+  });
+  document.getElementById('edit-block-modal').style.display = 'flex';
+}
+
+function closeEditBlock(){ document.getElementById('edit-block-modal').style.display = 'none'; }
+function selEType(btn){
+  document.querySelectorAll('.edit-type-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function saveEditedBlock(){
+  const origT = document.getElementById('eb-original-time').value;
+  const origL = document.getElementById('eb-original-label').value;
+  const newT = document.getElementById('eb-time').value;
+  const newL = document.getElementById('eb-label').value.trim();
+  if(!newL) return;
+  const newTy = document.querySelector('.edit-type-btn.active')?.dataset.t || 'personal';
+
+  // Check if updating in S.todayBlocks
+  const idx = S.todayBlocks.findIndex(b => b.t === origT && b.l === origL);
+  if(idx !== -1) {
+    S.todayBlocks[idx] = { t: newT, l: newL, ty: newTy };
+  } else {
+    // Add custom block override
+    S.todayBlocks.push({ t: newT, l: newL, ty: newTy });
+  }
+  save(); renderTimeline(); closeEditBlock();
+  showToast('✏️', 'Activity Updated!', `${newT} — ${newL}`);
+}
+
+function openBlockModal(){document.getElementById('block-modal').style.display='flex';}
+function closeBlock(){document.getElementById('block-modal').style.display='none';}
+function selBType(btn){document.querySelectorAll('.tsel-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
+function saveBlock(){
+  const t=document.getElementById('b-time').value;
+  const l=document.getElementById('b-label').value.trim();
+  if(!l)return;
+  const ty=document.querySelector('.tsel-btn.active')?.dataset.t||'personal';
+  S.todayBlocks.push({t,l,ty});
+  save();renderTimeline();closeBlock();
+  document.getElementById('b-label').value='';
+}
+
+// ---- HABITS ----
+function renderHabits(){
+  const el=document.getElementById('habit-list');
+  if(!el)return;
+  el.innerHTML=S.habits.map((h,i)=>`
+    <div class="habit-item" onclick="toggleHabit(${i})">
+      <div class="hcheck${h.done?' done':''}"></div>
+      <span class="habit-emoji">${h.em}</span>
+      <span class="habit-lbl${h.done?' done':''}">${h.lbl}</span>
+    </div>`).join('');
+  updateStats();
+}
+function toggleHabit(i){S.habits[i].done=!S.habits[i].done;save();renderHabits();}
+function addHabit(){
+  const l=prompt('Enter a habit you want to track:');
+  if(!l)return;
+  S.habits.push({id:Date.now(),lbl:l,em:'✅',done:false});
+  save();renderHabits();
+}
+
+// ---- STATS ----
+function updateStats(){
+  const done=S.habits.filter(h=>h.done).length,tot=S.habits.length;
+  document.getElementById('s-habits').textContent=`${done}/${tot}`;
+  const nh=new Date().getHours();
+  document.getElementById('s-free').textContent='3.5h';
+  const gtot=S.goals.reduce((a,g)=>a+g.tasks.length,0);
+  const gdone=S.goals.reduce((a,g)=>a+g.tasks.filter(t=>t.done).length,0);
+  document.getElementById('s-goals').textContent=Math.round(gdone/Math.max(1,gtot)*100)+'%';
+  document.getElementById('s-streak').textContent=`${S.streak||0}🔥`;
+  const pct=tot>0?Math.round(done/tot*100):0;
+  document.getElementById('day-prog').style.width=pct+'%';
+}
+
+// ---- TODAY MEALS PREVIEW ----
+function renderTodayMeals(){
+  const dk=['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+  const d=dk[new Date().getDay()];
+  const m=S.meals[d];
+  const el=document.getElementById('today-meals-preview');
+  if(!el||!m)return;
+  el.innerHTML=`
+    <div class="meal-type-lbl">🌅 Breakfast</div><div class="meal-preview-item">${m.bf||'Not planned'}</div>
+    <div class="meal-type-lbl">☀️ Lunch</div><div class="meal-preview-item">${m.ln||'Not planned'}</div>
+    <div class="meal-type-lbl">🌙 Pre-Shift / Dinner</div><div class="meal-preview-item">${m.dn||'Not planned'}</div>
+  `;
+}
+
+// ---- WEEK SCHEDULE ----
+function renderWeek(){
+  const grid = document.getElementById('week-grid');
+  if(!grid) return;
+  const n = new Date(), td = n.getDay();
+  const days = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+  const labels = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const order = [1,2,3,4,5,6,0];
+  const ws = new Date(n); ws.setDate(n.getDate()-(((n.getDay()+6)%7)));
+  
+  grid.innerHTML = order.map(d => {
+    const date = new Date(ws); date.setDate(ws.getDate()+((d+6)%7));
+    const dk = days[d]; const isT = d === td;
+    const extra = (S.weekExtra[dk] || []);
+    const isGrocery = dk === S.user.groceryDay;
+    const defTasks = d===0||d===6 ? [
+      {l:'😴 09:00 Wake Up & Rest',ty:'personal'},
+      {l:'🧘 10:00 Yoga Class (60m)',ty:'yoga'},
+      {l:'🎯 11:15 Reading & Self Focus',ty:'learn'},
+      {l:'🍽️ 12:30 Healthy Lunch',ty:'personal'}
+    ] : [
+      {l:'☀️ 09:00 Wake Up',ty:'personal'},
+      {l:'📚 09:50 German/Thesis (3.5h)',ty:'learn'},
+      {l:'🍽️ 12:30 Pre-Shift Lunch',ty:'personal'},
+      {l:'🏭 13:20 Amazon Shift (13.6h)',ty:'work'},
+      {l:'🏠 01:00 Shift Finished',ty:'personal'}
+    ];
+    
+    return `<div class="day-col${isT?' today-day':''}">
+      <div class="day-head">
+        <div class="day-name-lbl">${labels[d]}${isT?' •':''}</div>
+        <div class="day-num">${date.getDate()}</div>
+        ${isGrocery?'<div class="day-badge">🛒 Grocery</div>':''}
+      </div>
+      <div class="day-tasks-list">
+        ${defTasks.map(t => `<div class="day-task-item ${t.ty}"><span class="day-task-txt">${t.l}</span></div>`).join('')}
+        ${extra.map((t, i) => `
+          <div class="day-task-item personal">
+            <span class="day-task-txt">${t}</span>
+            <span class="day-task-del" onclick="editWeekTask('${dk}',${i})" title="Edit" style="margin-right:4px">✏️</span>
+            <span class="day-task-del" onclick="delWeekTask('${dk}',${i})" title="Delete">✕</span>
+          </div>
+        `).join('')}
+        <button class="day-add-btn" onclick="addWeekTask('${dk}')">+ Add Activity</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+
+function addWeekTask(d){
+  const t = prompt(`Add activity for ${d.toUpperCase()}:`);
+  if(!t || !t.trim()) return;
+  if(!S.weekExtra[d]) S.weekExtra[d] = [];
+  S.weekExtra[d].push(t.trim());
+  save(); renderWeek();
+}
+
+function delWeekTask(d, i){
+  if(S.weekExtra[d]) {
+    S.weekExtra[d].splice(i, 1);
+    save(); renderWeek();
+  }
+}
+
+function editWeekTask(d, i){
+  const current = S.weekExtra[d]?.[i] || '';
+  const updated = prompt(`Edit activity for ${d.toUpperCase()}:`, current);
+  if(updated && updated.trim()) {
+    S.weekExtra[d][i] = updated.trim();
+    save(); renderWeek();
+  }
+}
+
+
+let currentMobileMealDay = 'monday';
+
+function isMobileView(){
+  if(document.body.classList.contains('force-mobile')) return true;
+  if(document.body.classList.contains('force-desktop')) return false;
+  return window.innerWidth <= 768;
+}
+
+function setMobileMealDay(d){
+  currentMobileMealDay = d;
+  renderMealTable();
+}
+
+function renderMealTable(){
+  const container = document.getElementById('meal-table-container');
+  if(!container) return;
+  const days = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+  const dlbls = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const noC = ['thursday','sunday'];
+  const meals = [{key:'bf',lbl:'🌅 Breakfast'},{key:'ln',lbl:'☀️ Lunch'},{key:'dn',lbl:'🌙 Pre-Shift / Dinner'}];
+
+  if(isMobileView()){
+    let h = `<div class="mobile-day-pills">`;
+    days.forEach((d, i) => {
+      const isAct = d === currentMobileMealDay;
+      const isG = d === S.user.groceryDay;
+      h += `<button class="mobile-day-pill${isAct ? ' active' : ''}" onclick="setMobileMealDay('${d}')">${dlbls[i]}${isG ? ' 🛒' : ''}</button>`;
+    });
+    h += `</div>`;
+
+    const d = currentMobileMealDay;
+    h += `<div class="mobile-meal-card">`;
+    meals.forEach(({key, lbl}) => {
+      const nc = noC.includes(d) && key !== 'bf';
+      const v = S.meals[d]?.[key] || '';
+      h += `<div class="mobile-meal-sec">
+        <div class="mobile-meal-lbl">
+          <span>${lbl}</span>
+          ${nc ? '<span class="no-chicken-badge">🌱 No Chicken</span>' : ''}
+        </div>
+        <textarea class="meal-ta" style="min-height:64px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-sm);padding:8px;width:100%" data-d="${d}" data-k="${key}" onchange="updateMeal('${d}','${key}',this.value)" onblur="save()">${v}</textarea>
+      </div>`;
+    });
+    h += `</div>`;
+    container.innerHTML = h;
+  } else {
+    let h = `<table class="meal-grid-table" id="meal-table"><thead><tr><th style="width:80px">Meal</th>${dlbls.map((d,i)=>`<th>${d}${days[i]===S.user.groceryDay?' 🛒':''}</th>`).join('')}</tr></thead><tbody>`;
+    meals.forEach(({key,lbl})=>{
+      h += `<tr><td class="meal-type-cell">${lbl}</td>`;
+      days.forEach(d=>{
+        const nc = noC.includes(d) && key !== 'bf';
+        const v = S.meals[d]?.[key] || '';
+        h += `<td><div class="meal-cell-inner${nc?' restricted':''}">
+          ${nc?'<div class="no-chicken-badge">🌱 No Chicken</div>':''}
+          <textarea class="meal-ta" data-d="${d}" data-k="${key}" onchange="updateMeal('${d}','${key}',this.value)" onblur="save()">${v}</textarea>
+        </div></td>`;
+      });
+      h += '</tr>';
+    });
+    h += '</tbody></table>';
+    container.innerHTML = h;
+  }
+}
+
+function updateMeal(d,k,v){if(!S.meals[d])S.meals[d]={};S.meals[d][k]=v;renderTodayMeals();}
+
+function clearAllMeals(){
+  if(!confirm('Are you sure you want to clear all meals for the week?')) return;
+  const days=['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+  days.forEach(d => S.meals[d] = {bf:'', ln:'', dn:''});
+  save(); renderMealTable(); renderTodayMeals();
+  showToast('🗑️', 'Meals Cleared', 'Weekly meal plan has been reset.');
+}
+
+function saveDefaultMeals(){
+  S.defaultMeals = JSON.parse(JSON.stringify(S.meals));
+  save();
+  showToast('💾', 'Default Meals Saved', 'Your current meal layout is set as default.');
+}
+
+function resetDefaultMeals(){
+  if(S.defaultMeals){
+    S.meals = JSON.parse(JSON.stringify(S.defaultMeals));
+    save(); renderMealTable(); renderTodayMeals();
+    showToast('↺', 'Saved Default Restored', 'Restored your saved default meal plan.');
+  } else {
+    S.meals = {
+      monday:   {bf:'Greek Yogurt Bowl + Fresh Berries & Honey',ln:'Grilled Chicken & Avocado Salad Bowl',dn:'Chicken Stir-fry + Quinoa & Roasted Veggies (Pre-Shift Meal)'},
+      tuesday:  {bf:'Scrambled Eggs + Avocado & Whole Grain Toast',ln:'Warm Quinoa & Sweet Potato Power Bowl',dn:'Baked Lemon Herb Chicken + Broccoli & Rice'},
+      wednesday:{bf:'Overnight Protein Oats + Banana & Almonds',ln:'Chicken & Spinach Whole Wheat Wrap',dn:'Grilled Chicken Breast + Sweet Potato & Fresh Salad'},
+      thursday: {bf:'Blush Smoothie Bowl (Berries & Chia)',ln:'🌱 Creamy Red Lentil & Vegetable Soup',dn:'🌱 Tofu & Veggie Curry + Brown Rice (No Chicken)'},
+      friday:   {bf:'Greek Yogurt + Granola & Sliced Peaches',ln:'Chicken Tortilla Soup + Green Salad',dn:'Grilled Chicken Tikka + Raita & Whole Wheat Pita'},
+      saturday: {bf:'Acai Berry Smoothie Bowl + Almond Butter',ln:'Healthy Avocado & Egg Toast / Leftovers',dn:'Baked Salmon / Chicken + Roasted Asparagus'},
+      sunday:   {bf:'Fluffy Oats & Banana Protein Pancakes',ln:'Fresh Mediterranean Garden Salad + Eggs',dn:'🌱 Pasta Primavera with Fresh Herbs & Veggies (No Chicken)'},
+    };
+    save(); renderMealTable(); renderTodayMeals();
+    showToast('↺', 'Standard Default Restored', 'Standard healthy shift plan loaded.');
+  }
+}
+
+function syncMealsToGrocery(){
+  let count = 0;
+  Object.values(S.meals).forEach(m => {
+    [m.bf, m.ln, m.dn].forEach(txt => {
+      if(!txt) return;
+      const items = txt.split(/[\+\,\&]/).map(s => s.trim()).filter(s => s.length > 3);
+      items.forEach(item => {
+        const catIdx = S.grocery.findIndex(c => c.cat.includes('Produce') || c.cat.includes('Pantry') || c.cat.includes('Protein'));
+        const targetCat = S.grocery[catIdx !== -1 ? catIdx : 0];
+        if(!targetCat.items.some(i => i.n.toLowerCase() === item.toLowerCase())){
+          targetCat.items.push({n: item, c: false});
+          count++;
+        }
+      });
+    });
+  });
+  save(); renderGrocery();
+  showToast('🛒', 'Grocery Synced', `Added ${count} new ingredients to your grocery list! Opening menu view...`);
+  openGroceryMenuModal();
+}
+
+// ---- HOTEL MENU & MOBILE AI COACH TABS ----
+let currentHotelMenuTab = 'grocery';
+
+function switchCoachTab(tab, btn){
+  const chatWrap = document.querySelector('.chat-wrap');
+  const sidebar = document.querySelector('.coach-sidebar');
+  const tabChat = document.getElementById('cmtab-chat');
+  const tabSidebar = document.getElementById('cmtab-sidebar');
+  
+  if (tab === 'chat') {
+    if (chatWrap) chatWrap.classList.remove('hide-mobile');
+    if (sidebar) sidebar.classList.remove('show-mobile');
+    if (tabChat) tabChat.classList.add('active');
+    if (tabSidebar) tabSidebar.classList.remove('active');
+  } else {
+    if (chatWrap) chatWrap.classList.add('hide-mobile');
+    if (sidebar) sidebar.classList.add('show-mobile');
+    if (tabSidebar) tabSidebar.classList.add('active');
+    if (tabChat) tabChat.classList.remove('active');
+  }
+}
+
+function openGroceryMenuModal(){
+  renderHotelMenuContent();
+  document.getElementById('grocery-menu-modal').style.display = 'flex';
+}
+
+function closeGroceryMenuModal(){
+  document.getElementById('grocery-menu-modal').style.display = 'none';
+}
+
+function switchHotelMenuTab(tab, btn){
+  currentHotelMenuTab = tab;
+  document.querySelectorAll('.hm-nav-btn').forEach(b => b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  renderHotelMenuContent();
+}
+
+function renderHotelMenuContent(){
+  const body = document.getElementById('hm-body');
+  if(!body) return;
+
+  if(currentHotelMenuTab === 'grocery'){
+    let html = `<div class="hm-grid">`;
+    S.grocery.forEach((cat, ci) => {
+      html += `<div class="hm-card">
+        <div class="hm-card-title">
+          <span>${cat.cat}</span>
+          <span class="hm-item-tag">${cat.items.length} items</span>
+        </div>`;
+      cat.items.forEach((item, ii) => {
+        html += `<div class="hm-item${item.c ? ' done' : ''}" onclick="toggleGrocery(${ci},${ii});renderHotelMenuContent()">
+          <div class="hm-item-name">
+            <span>${item.c ? '✓' : '•'}</span>
+            <span>${item.n}</span>
+          </div>
+          ${item.c ? '<span class="hm-item-tag" style="color:var(--text-faint)">Checked</span>' : '<span class="hm-item-tag">Fresh</span>'}
+        </div>`;
+      });
+      html += `</div>`;
+    });
+    html += `</div>`;
+    body.innerHTML = html;
+  } else {
+    const days = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+    const dlbls = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+    const noC = ['thursday','sunday'];
+    let html = `<div class="hm-grid">`;
+    days.forEach((d, i) => {
+      const m = S.meals[d] || {};
+      const isNC = noC.includes(d);
+      html += `<div class="hm-card">
+        <div class="hm-card-title">
+          <span>📅 ${dlbls[i]}</span>
+          ${isNC ? '<span class="no-chicken-badge">🌱 No Chicken</span>' : '<span class="hm-item-tag">Standard</span>'}
+        </div>
+        <div class="hm-item" style="flex-direction:column;align-items:flex-start;gap:2px">
+          <div style="font-size:10px;color:var(--rose);font-weight:700">🌅 BREAKFAST</div>
+          <div style="font-weight:500">${m.bf || 'Not planned'}</div>
+        </div>
+        <div class="hm-item" style="flex-direction:column;align-items:flex-start;gap:2px">
+          <div style="font-size:10px;color:var(--rose);font-weight:700">☀️ LUNCH</div>
+          <div style="font-weight:500">${m.ln || 'Not planned'}</div>
+        </div>
+        <div class="hm-item" style="flex-direction:column;align-items:flex-start;gap:2px">
+          <div style="font-size:10px;color:var(--rose);font-weight:700">🌙 PRE-SHIFT / DINNER</div>
+          <div style="font-weight:500">${m.dn || 'Not planned'}</div>
+        </div>
+      </div>`;
+    });
+    html += `</div>`;
+    body.innerHTML = html;
+  }
+}
+
+// ---- GROCERY ----
+function renderGrocery(){
+  const el=document.getElementById('grocery-list');
+  if(!el)return;
+  const day=S.user.groceryDay||'wednesday';
+  const badge=document.getElementById('g-day-badge');
+  if(badge)badge.textContent=`📅 ${day.charAt(0).toUpperCase()+day.slice(1)}`;
+  el.innerHTML=S.grocery.map((c,ci)=>`
+    <div class="grocery-cat">
+      <div class="grocery-cat-title">${c.cat}</div>
+      ${c.items.map((item,ii)=>`
+        <div class="grocery-row${item.c?' item-done':''}">
+          <div class="g-check${item.c?' done':''}" onclick="toggleGrocery(${ci},${ii})"></div>
+          <span class="g-name" onclick="toggleGrocery(${ci},${ii})">${item.n}</span>
+          <div class="g-item-actions">
+            <button class="g-action-btn" onclick="editGrocery(${ci},${ii})" title="Edit Item">✏️</button>
+            <button class="g-action-btn" onclick="deleteGrocery(${ci},${ii})" title="Delete Item">✕</button>
+          </div>
+        </div>`).join('')}
+    </div>`).join('');
+}
+function refreshGrocery(){renderGrocery();showToast('🛒','Grocery List Ready!',`Shopping list updated for ${S.user.groceryDay}. Enjoy healthy cooking!`);}
+function toggleGrocery(ci,ii){S.grocery[ci].items[ii].c=!S.grocery[ci].items[ii].c;save();renderGrocery();}
+
+function deleteGrocery(ci,ii){
+  S.grocery[ci].items.splice(ii,1);
+  save();renderGrocery();
+}
+
+function editGrocery(ci,ii){
+  const cur = S.grocery[ci].items[ii].n;
+  const val = prompt('Edit grocery item:', cur);
+  if(val && val.trim()){
+    S.grocery[ci].items[ii].n = val.trim();
+    save();renderGrocery();
+  }
+}
+
+function clearCheckedGrocery(){
+  S.grocery.forEach(c => { c.items = c.items.filter(i => !i.c); });
+  save();renderGrocery();
+  showToast('🧹', 'Checked Items Cleared', 'Completed items removed from list.');
+}
+
+function addGroceryCategory(){
+  const catName = prompt('Enter new category name (e.g. 🥛 Dairy & Snacks):');
+  if(!catName || !catName.trim()) return;
+  S.grocery.push({cat: catName.trim(), items: []});
+  save();renderGrocery();
+}
+
+function manualGrocery(){
+  const inp=document.getElementById('grocery-manual');
+  const v=inp.value.trim();if(!v)return;
+  if(!S.grocery.length) S.grocery.push({cat:'🛒 General', items:[]});
+  S.grocery[S.grocery.length-1].items.push({n:v,c:false});
+  save();renderGrocery();inp.value='';
+}
+
+// ---- GOALS ----
+function renderGoals(){
+  const el=document.getElementById('goals-grid');
+  if(!el)return;
+  el.innerHTML=S.goals.map((g,gi)=>{
+    const done=g.tasks.filter(t=>t.done).length,tot=g.tasks.length;
+    const pct=tot>0?Math.round(done/tot*100):0;
+    return`<div class="goal-card">
+      <div class="goal-head">
+        <div class="goal-icon">${g.icon}</div>
+        <div>
+          <div class="goal-title">${g.title}</div>
+          <div class="goal-pct">${done}/${tot} tasks complete — ${pct}%</div>
+        </div>
+      </div>
+      <div class="goal-prog"><div class="goal-prog-fill" style="width:${pct}%"></div></div>
+      <div class="goal-tasks">
+        ${g.tasks.map((task,ti)=>`
+          <div class="goal-task${task.done?' task-done':''}" onclick="toggleTask(${gi},${ti})">
+            <div class="gt-check${task.done?' done':''}"></div>
+            <span class="gt-text">${task.text}</span>
+          </div>`).join('')}
+      </div>
+      <input class="add-task-inp" type="text" placeholder="+ Add a new goal task..." onkeydown="if(event.key==='Enter')addTask(${gi},this)">
+    </div>`;
+  }).join('');
+  updateStats();
+}
+function toggleTask(gi,ti){S.goals[gi].tasks[ti].done=!S.goals[gi].tasks[ti].done;save();renderGoals();}
+function addTask(gi,inp){
+  const t=inp.value.trim();if(!t)return;
+  S.goals[gi].tasks.push({id:Date.now(),text:t,done:false});
+  save();renderGoals();inp.value='';
+}
+
+// ---- AI COACH CHAT ----
+function initChat(){
+  const el=document.getElementById('chat-msgs');
+  if(!el)return;
+  if(S.chatHistory.length===0){
+    addMsg('assistant',`Hallo! I am your GUNDU AI Coach. 💪
+
+I know your profile:
+• Amazon Shift Manager (Straubing), shift & commute 1:20 PM – 1:00 AM
+• Morning Free Time: 9:00 AM – 1:20 PM (3.5 hours for growth!)
+• Level: B2 German working towards C1 fluency
+• 5 Goals: Leadership, German, AI Tools, Master's degree, Driving License
+• Weekend Yoga warrior (10:00 – 11:00 AM Sat–Sun)
+
+I am here to give you direct guidance and accountability. How can I assist your focus today?`);
+  } else {
+    S.chatHistory.forEach(m=>renderMsg(m.role,m.content,false));
+  }
+}
+function addMsg(role,content,pushHistory=true){
+  if(pushHistory)S.chatHistory.push({role,content});
+  renderMsg(role,content);
+  if(pushHistory)save();
+}
+function renderMsg(role,content,scroll=true){
+  const el=document.getElementById('chat-msgs');
+  const now=new Date();
+  const t=`${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  const d=document.createElement('div');
+  d.className=`msg ${role}`;
+  d.innerHTML=`<div class="msg-av">${role==='assistant'?'🤖':'👤'}</div>
+    <div class="msg-body">
+      <div class="msg-bubble">${content.split(String.fromCharCode(10)).join('<br>')}</div>
+      <div class="msg-time">${t}</div>
+    </div>`;
+  el.appendChild(d);
+  if(scroll)el.scrollTop=el.scrollHeight;
+}
+
+async function sendMsg(){
+  const inp = document.getElementById('chat-in');
+  const txt = inp.value.trim(); if (!txt) return;
+  addMsg('user', txt); inp.value = ''; inp.style.height = 'auto';
+  
+  const p = S.provider || 'mistral';
+  const key = localStorage.getItem('gundu_key_' + p) || KEYS[p] || '';
+  
+  const msgs = document.getElementById('chat-msgs');
+  const tDiv = document.createElement('div'); tDiv.className = 'msg assistant'; tDiv.id = 'typing';
+  tDiv.innerHTML = `<div class="msg-av">🤖</div><div class="typing"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div></div>`;
+  msgs.appendChild(tDiv); msgs.scrollTop = msgs.scrollHeight;
+  document.getElementById('send-btn').disabled = true;
+
+  const nm = S.user.name || 'Manager';
+  const sys = `You are GUNDU AI, an empowering tough-love personal coach for ${nm}, an Amazon Shift Manager in Straubing, Germany.
+
+HER SCHEDULE & CONSTRAINTS:
+- Amazon shift + travel + food: 1:20 PM – 1:00 AM (Mon–Fri)
+- Morning free time: 9:00 AM – 1:20 PM (3.5 hours for intense personal growth!)
+- German Level: B2 (working towards C1 fluency)
+- Weekend: Yoga 10:00–11:00 AM Sat & Sun, rest, zero chores/cooking
+- Diet: Healthy, chicken OK except Thursdays & Sundays (vegetarians only)
+
+HER 5 GOALS:
+1. Learn to Lead (warehouse team leadership & management)
+2. Master B2/C1 German (workplace German fluency)
+3. Master AI Tools (productivity & automation)
+4. Finish Master's Degree (thesis & academic writing)
+5. Get Driving License (theory & driving lessons)
+
+YOUR STYLE: Elegant, direct, empowering, zero excuses. Actionable & specific advice tailored to her 1:20 PM shift. Max 3 short paragraphs. Include B2/C1 German expressions with translations.
+
+ACTION EXECUTION CAPABILITIES:
+You are directly integrated into the GUNDU Command Center web app interface and CAN trigger visual UI views, open modals, save default meal plans, toggle themes, and edit dashboard state!
+NEVER say "I cannot launch visual web browsers or app views". You CAN open and trigger any view, modal, or action on the user's screen using action command tags at the end of your response!
+Available Action Command Tags:
+[ACTION: OPEN_HOTEL_MENU]
+[ACTION: SAVE_DEFAULT_MEALS]
+[ACTION: RESET_DEFAULT_MEALS]
+[ACTION: SYNC_GROCERY]
+[ACTION: TOGGLE_THEME]
+[ACTION: SWITCH_TAB tab="meals"]
+[ACTION: UPDATE_MEAL day="monday" meal="dn" text="Grilled Salmon with Asparagus"]
+[ACTION: ADD_GROCERY category="🥩 Healthy Protein" item="Salmon Fillet (400g)"]
+[ACTION: ADD_BLOCK time="10:00" label="Activity name" type="personal"]`;
+
+  let url = 'https://api.mistral.ai/v1/chat/completions';
+  let model = 'mistral-small-latest';
+
+  if (p === 'openrouter') {
+    url = 'https://openrouter.ai/api/v1/chat/completions';
+    model = 'openrouter/auto';
+  } else if (p === 'openai') {
+    url = 'https://api.openai.com/v1/chat/completions';
+    model = 'gpt-4o-mini';
+  }
+
+  try {
+    const r = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${key}`
+      },
+      body: JSON.stringify({
+        model,
+        messages: [{ role: 'system', content: sys }, ...S.chatHistory.slice(-10).map(m => ({ role: m.role, content: m.content }))],
+        max_tokens: 1200,
+        temperature: 0.7
+      })
+    });
+    const data = await r.json();
+    document.getElementById('typing')?.remove();
+    const choice = data.choices?.[0];
+    let replyText = choice?.message?.content || choice?.text || choice?.delta?.content;
+    
+    // If empty content due to max_output_tokens length limit on reasoning models
+    if (!replyText && choice?.finish_reason === 'length') {
+      replyText = choice?.message?.reasoning || '⚠️ Model ran out of response tokens during reasoning. Retrying with higher token limit...';
+    }
+    
+    if (replyText) {
+      replyText = parseAndExecuteAiActions(replyText);
+      addMsg('assistant', replyText);
+    } else if (data.error) {
+      const errMsg = typeof data.error === 'string' ? data.error : (data.error.message || JSON.stringify(data.error));
+      addMsg('assistant', `❌ API Error (${p.toUpperCase()}): ${errMsg}`);
+    } else {
+      addMsg('assistant', `❌ Response Debug (${p.toUpperCase()}): ` + JSON.stringify(data).slice(0, 300));
+    }
+  } catch (e) {
+    document.getElementById('typing')?.remove();
+    addMsg('assistant', '❌ Connection error: ' + (e.message || e.toString()));
+  }
+  document.getElementById('send-btn').disabled = false;
+}
+
+function parseAndExecuteAiActions(text){
+  if(!text) return text;
+  const regex = /\[ACTION:\s*([A-Z_]+)(?:\s+([^\]]+))?\]/gi;
+  let match;
+  let executedCount = 0;
+  while((match = regex.exec(text)) !== null){
+    const actionType = match[1].toUpperCase();
+    const attrStr = match[2] || '';
+    const attrs = {};
+    const attrRegex = /([a-zA-Z0-9_]+)="([^"]+)"/g;
+    let attrMatch;
+    while((attrMatch = attrRegex.exec(attrStr)) !== null){
+      attrs[attrMatch[1]] = attrMatch[2];
+    }
+    
+    if(actionType === 'OPEN_HOTEL_MENU'){
+      openGroceryMenuModal();
+      executedCount++;
+    } else if(actionType === 'SAVE_DEFAULT_MEALS'){
+      saveDefaultMeals();
+      executedCount++;
+    } else if(actionType === 'RESET_DEFAULT_MEALS'){
+      resetDefaultMeals();
+      executedCount++;
+    } else if(actionType === 'SYNC_GROCERY'){
+      syncMealsToGrocery();
+      executedCount++;
+    } else if(actionType === 'TOGGLE_THEME'){
+      toggleTheme();
+      executedCount++;
+    } else if(actionType === 'SWITCH_TAB' && attrs.tab){
+      showTab(attrs.tab, document.querySelector(`[onclick*="${attrs.tab}"]`));
+      executedCount++;
+    } else if(actionType === 'UPDATE_MEAL' && attrs.day && attrs.meal && attrs.text){
+      const d = attrs.day.toLowerCase(), k = attrs.meal.toLowerCase();
+      if(!S.meals[d]) S.meals[d] = {};
+      S.meals[d][k] = attrs.text;
+      executedCount++;
+    } else if(actionType === 'ADD_GROCERY' && attrs.item){
+      const catName = attrs.category || '🧴 Pantry & Wellness';
+      let cat = S.grocery.find(c => c.cat.toLowerCase().includes(catName.toLowerCase()));
+      if(!cat){ cat = {cat: catName, items: []}; S.grocery.push(cat); }
+      cat.items.push({n: attrs.item, c: false});
+      executedCount++;
+    } else if(actionType === 'ADD_BLOCK' && attrs.time && attrs.label){
+      S.todayBlocks.push({t: attrs.time, l: attrs.label, ty: attrs.type || 'personal'});
+      executedCount++;
+    }
+  }
+  if(executedCount > 0){
+    save();
+    renderMealTable(); renderTodayMeals(); renderGrocery(); renderTimeline();
+    showToast('🤖', 'AI Command Executed!', `AI Coach performed ${executedCount} actions on your dashboard.`);
+  }
+  return text.replace(/\[ACTION:\s*[A-Z_]+(?:\s+[^\]]+)?\]/gi, '').trim();
+}
+
+function qp(t){document.getElementById('chat-in').value=t;showTab('coach',document.querySelector('[onclick*="coach"]'));sendMsg();}
+function autoH(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,100)+'px';}
+
+function loadKey(){
+  let p = S.provider || 'mistral';
+  let k = localStorage.getItem('gundu_key_' + p) || KEYS[p] || '';
+  if (k) localStorage.setItem('gundu_key_' + p, k);
+  
+  const sel = document.getElementById('api-provider');
+  if (sel) sel.value = p;
+  
+  const inp = document.getElementById('api-key');
+  if (inp) inp.value = k;
+  
+  const title = document.getElementById('api-status-title');
+  if (title) title.textContent = '✅ ' + p.toUpperCase() + ' Connected & Active!';
+  
+  const sub = document.getElementById('api-status-sub');
+  if (sub) sub.textContent = 'Your AI Coach is ready using ' + p.toUpperCase() + '.';
+
+  const mSel = document.getElementById('modal-api-provider');
+  if (mSel) mSel.value = p;
+  const mInp = document.getElementById('modal-api-key');
+  if (mInp) mInp.value = k;
+  const mTitle = document.getElementById('modal-api-status-title');
+  if (mTitle) mTitle.textContent = '✅ ' + p.toUpperCase() + ' Connected & Active!';
+  const mSub = document.getElementById('modal-api-status-sub');
+  if (mSub) mSub.textContent = 'Your AI Coach is ready using ' + p.toUpperCase() + '.';
+}
+
+function saveKey(){
+  let p = S.provider || 'mistral';
+  let k = document.getElementById('api-key')?.value.trim() || document.getElementById('modal-api-key')?.value.trim();
+  if (k) {
+    localStorage.setItem('gundu_key_' + p, k);
+    showToast('🔑', 'API Key Saved', `${p.toUpperCase()} API Key activated!`);
+  }
+  loadKey();
+}
+
+function openCoachSettingsModal(){
+  loadKey();
+  document.getElementById('coach-settings-modal').style.display = 'flex';
+}
+
+function closeCoachSettingsModal(){
+  document.getElementById('coach-settings-modal').style.display = 'none';
+}
+
+function saveModalKey(){
+  let p = S.provider || 'mistral';
+  let k = document.getElementById('modal-api-key')?.value.trim();
+  if (k) {
+    localStorage.setItem('gundu_key_' + p, k);
+    showToast('🔑', 'API Key Saved', `${p.toUpperCase()} API Key activated!`);
+  }
+  loadKey();
+  closeCoachSettingsModal();
+}
+
+function qpModal(t){
+  closeCoachSettingsModal();
+  qp(t);
+}
+
+function switchProvider(p){
+  S.provider = p;
+  save();
+  loadKey();
+}
+
+// ---- NOTES ----
+function renderNotes(){
+  const el=document.getElementById('note-list');
+  if(!el)return;
+  el.innerHTML=S.notes.length?S.notes.map((n,i)=>`
+    <div class="note-item${S.currentNote===n.id?' active':''}" onclick="openNote(${n.id})">
+      <div class="note-item-wrap">
+        <div class="note-item-title">${n.title||'Untitled Note'}</div>
+        <span class="note-del-x" onclick="deleteNote(event,${n.id})" title="Delete Note">✕</span>
+      </div>
+      <div class="note-preview">${n.body||'Empty note...'}</div>
+      <div class="note-date">${new Date(n.at).toLocaleDateString()}</div>
+    </div>`).join(''):'<div style="padding:12px;color:var(--text-faint);font-size:12px">No notes yet — click + New Note!</div>';
+}
+function newNote(){
+  const n={id:Date.now(),title:'',body:'',at:Date.now()};
+  S.notes.unshift(n);S.currentNote=n.id;save();renderNotes();
+  document.getElementById('note-title').value='';document.getElementById('note-body').value='';
+  document.getElementById('note-title').focus();
+}
+function openNote(id){
+  S.currentNote=id;const n=S.notes.find(x=>x.id===id);if(!n)return;
+  document.getElementById('note-title').value=n.title||'';
+  document.getElementById('note-body').value=n.body||'';
+  renderNotes();
+}
+
+function deleteNote(e, id){
+  if(e) e.stopPropagation();
+  S.notes = S.notes.filter(n => n.id !== id);
+  if(S.currentNote === id) {
+    S.currentNote = S.notes[0]?.id || null;
+    if(S.currentNote) openNote(S.currentNote);
+    else { document.getElementById('note-title').value = ''; document.getElementById('note-body').value = ''; }
+  }
+  save(); renderNotes();
+}
+
+function deleteCurrentNote(){
+  if(!S.currentNote) return;
+  deleteNote(null, S.currentNote);
+}
+
+function renderTodos(){
+  const el = document.getElementById('todo-list');
+  if(!el) return;
+  const countEl = document.getElementById('todo-count');
+  if(!S.todos) S.todos = [];
+  
+  const pending = S.todos.filter(t => !t.done).length;
+  if(countEl) countEl.textContent = `${pending} pending`;
+  
+  el.innerHTML = S.todos.length ? S.todos.map((t, i) => `
+    <div class="todo-item${t.done?' done':''}">
+      <div class="g-check${t.done?' done':''}" onclick="toggleTodo(${i})"></div>
+      <span class="todo-txt" onclick="toggleTodo(${i})">${t.txt}</span>
+      <button class="todo-del-btn" onclick="deleteTodo(${i})" title="Delete Task">✕</button>
+    </div>
+  `).join('') : '<div style="padding:12px;color:var(--text-faint);font-size:12px;text-align:center">No tasks yet — add one above!</div>';
+}
+
+function addTodo(){
+  const inp = document.getElementById('todo-in');
+  const txt = inp.value.trim(); if(!txt) return;
+  if(!S.todos) S.todos = [];
+  S.todos.unshift({ id: Date.now(), txt, done: false });
+  save(); renderTodos(); inp.value = '';
+}
+
+function toggleTodo(i){
+  if(S.todos[i]) { S.todos[i].done = !S.todos[i].done; save(); renderTodos(); }
+}
+
+function deleteTodo(i){
+  if(S.todos[i]) { S.todos.splice(i, 1); save(); renderTodos(); }
+}
+
+function saveNote(){
+  if(!S.currentNote)return;
+  const n=S.notes.find(x=>x.id===S.currentNote);if(!n)return;
+  n.title=document.getElementById('note-title').value;
+  n.body=document.getElementById('note-body').value;
+  n.at=Date.now();save();
+}
+
+// ---- MASTER PIN SECURITY LOGIC ----
+function pinNext(idx) {
+  const current = document.getElementById('pin-' + idx);
+  if (current.value.length === 1 && idx < 4) {
+    document.getElementById('pin-' + (idx + 1)).focus();
+  }
+  if (idx === 4 && getEnteredPin().length === 4) {
+    submitPin();
+  }
+}
+
+function pinBack(e, idx) {
+  if (e.key === 'Backspace' && !document.getElementById('pin-' + idx).value && idx > 1) {
+    document.getElementById('pin-' + (idx - 1)).focus();
+  }
+}
+
+function getEnteredPin() {
+  return (
+    (document.getElementById('pin-1')?.value || '') +
+    (document.getElementById('pin-2')?.value || '') +
+    (document.getElementById('pin-3')?.value || '') +
+    (document.getElementById('pin-4')?.value || '')
+  );
+}
+
+function submitPin() {
+  const entered = getEnteredPin();
+  const targetPin = S.pin || '1234';
+  const errMsg = document.getElementById('pin-err-msg');
+  const lockCard = document.getElementById('lock-card');
+  
+  if (entered === targetPin) {
+    S.isUnlocked = true;
+    if (errMsg) errMsg.style.display = 'none';
+    const lockOverlay = document.getElementById('lock-screen');
+    if (lockOverlay) {
+      lockOverlay.style.animation = 'fadeOut 0.25s ease forwards';
+      setTimeout(() => {
+        lockOverlay.style.display = 'none';
+        lockOverlay.style.animation = '';
+      }, 250);
+    }
+    showToast('🔓', 'Dashboard Unlocked', 'Welcome back to GUNDU Command Center.');
+  } else {
+    if (errMsg) errMsg.style.display = 'block';
+    if (lockCard) {
+      lockCard.classList.remove('shake-anim');
+      void lockCard.offsetWidth;
+      lockCard.classList.add('shake-anim');
+    }
+    [1, 2, 3, 4].forEach(i => {
+      const el = document.getElementById('pin-' + i);
+      if (el) el.value = '';
+    });
+    document.getElementById('pin-1')?.focus();
+  }
+}
+
+function lockApp() {
+  S.isUnlocked = false;
+  [1, 2, 3, 4].forEach(i => {
+    const el = document.getElementById('pin-' + i);
+    if (el) el.value = '';
+  });
+  const errMsg = document.getElementById('pin-err-msg');
+  if (errMsg) errMsg.style.display = 'none';
+  const lockOverlay = document.getElementById('lock-screen');
+  if (lockOverlay) {
+    lockOverlay.style.display = 'flex';
+  }
+  setTimeout(() => document.getElementById('pin-1')?.focus(), 100);
+}
+
+function checkLockStatus() {
+  if (S.pinEnabled !== false && !S.isUnlocked) {
+    lockApp();
+  } else {
+    document.getElementById('lock-screen').style.display = 'none';
+  }
+}
+
+// ---- SETTINGS ----
+function applyViewMode(){
+  const mode = S.user.viewMode || 'auto';
+  document.body.classList.remove('force-mobile', 'force-desktop');
+  if(mode === 'mobile') document.body.classList.add('force-mobile');
+  else if(mode === 'desktop') document.body.classList.add('force-desktop');
+  renderMealTable();
+}
+
+function openSettings(){
+  document.getElementById('s-name').value=S.user.name||'Manager';
+  document.getElementById('s-shift-str').value=S.user.shiftStr||'1:20 PM – 1:00 AM';
+  document.getElementById('s-wake').value=S.user.wakeUp||'09:00';
+  document.getElementById('s-view-mode').value=S.user.viewMode||'auto';
+  document.getElementById('s-notif').value=S.user.notifications||'on';
+  document.getElementById('s-pin-enabled').value=S.pinEnabled!==false?'on':'off';
+  document.getElementById('s-pin-code').value=S.pin||'1234';
+  document.querySelectorAll('.dsel-btn').forEach(b=>b.classList.toggle('sel',b.dataset.d===S.user.groceryDay));
+  document.getElementById('settings-modal').style.display='flex';
+}
+function closeSettings(){document.getElementById('settings-modal').style.display='none';}
+function selDay(btn){document.querySelectorAll('.dsel-btn').forEach(b=>b.classList.remove('sel'));btn.classList.add('sel');}
+function saveSettings(){
+  S.user.name=document.getElementById('s-name').value||'Manager';
+  S.user.shiftStr=document.getElementById('s-shift-str').value;
+  S.user.wakeUp=document.getElementById('s-wake').value;
+  S.user.viewMode=document.getElementById('s-view-mode').value;
+  S.user.notifications=document.getElementById('s-notif').value;
+  S.pinEnabled=document.getElementById('s-pin-enabled').value==='on';
+  const pinInput=document.getElementById('s-pin-code').value.trim();
+  if(pinInput.length===4 && /^\d+$/.test(pinInput)) {
+    S.pin=pinInput;
+  }
+  const sel=document.querySelector('.dsel-btn.sel');if(sel)S.user.groceryDay=sel.dataset.d;
+  save();applyViewMode();updateUserDisplay();renderTimeline();renderWeek();renderGrocery();renderMealTable();closeSettings();
+  showToast('✅','Settings Saved!',`Dashboard updated for ${S.user.name}.`);
+}
+function updateUserDisplay(){
+  const nm=S.user.name||'Manager';
+  const n=new Date(), d=n.getDay(), isWE=d===0||d===6;
+  document.getElementById('un').textContent=nm;
+  document.getElementById('ua').textContent=nm.charAt(0).toUpperCase();
+  document.getElementById('ur').textContent=isWE ? '🌱 Weekend Off / Recovery' : `🟢 Amazon Shift (${S.user.shiftStr})`;
+  const subEl = document.getElementById('today-sec-sub');
+  if(subEl) {
+    subEl.textContent = isWE 
+      ? '🧘 Weekend Recovery & Self-Growth • No Amazon Shift Today' 
+      : `Free Time: 9:00 AM – 1:20 PM • Amazon Shift: ${S.user.shiftStr}`;
+  }
+}
+
+// ---- STREAK ----
+function checkStreak(){
+  const today=new Date().toDateString();
+  if(S.lastDate===today)return;
+  const yest=new Date();yest.setDate(yest.getDate()-1);
+  if(S.lastDate===yest.toDateString()&&S.habits.some(h=>h.done)){S.streak=(S.streak||0)+1;}
+  else if(S.lastDate&&S.lastDate!==today){S.streak=0;}
+  S.lastDate=today;
+  S.habits.forEach(h=>h.done=false);
+  save();
+}
+
+// ---- INIT ----
+function init(){
+  load();applyTheme();applyViewMode();checkStreak();
+  tickClock();setInterval(tickClock,1000);
+  setInterval(checkNotifs,60000);
+  window.addEventListener('resize', applyViewMode);
+  updateGermanBtn();updateUserDisplay();
+  renderEgoBanner();renderTimeline();renderHabits();
+  renderTodayMeals();renderWeek();renderMealTable();
+  renderGrocery();renderGoals();renderNotes();renderTodos();initChat();loadKey();updateStats();
+  checkLockStatus();
+  if('Notification'in window&&Notification.permission==='default'){
+    setTimeout(()=>Notification.requestPermission().then(p=>{
+      if(p==='granted')showToast('🔔','Notifications Active','Ego push notifications enabled.');
+    }),3000);
+  }
+  setTimeout(()=>showToast('✨','Welcome to GUNDU Command Center','Your elegant daily planner is active. Morning window: 9:00 AM to 1:20 PM.'),1500);
+}
+
+init();
+
+</script>
+
+<!-- EDIT BLOCK MODAL -->
+<div class="block-modal-bg" id="edit-block-modal" style="display:none">
+  <div class="block-modal-box">
+    <h3>✏️ Edit Activity</h3>
+    <input type="hidden" id="eb-original-time">
+    <input type="hidden" id="eb-original-label">
+    <div class="brow">
+      <input class="binput" type="time" id="eb-time" style="max-width:100px">
+      <input class="binput" type="text" id="eb-label" placeholder="Activity name...">
+    </div>
+    <div class="type-sel">
+      <button class="tsel-btn edit-type-btn active" data-t="personal" onclick="selEType(this)">Personal</button>
+      <button class="tsel-btn edit-type-btn" data-t="work" onclick="selEType(this)">Work</button>
+      <button class="tsel-btn edit-type-btn" data-t="learning" onclick="selEType(this)">Learning</button>
+      <button class="tsel-btn edit-type-btn" data-t="yoga" onclick="selEType(this)">Yoga/Health</button>
+    </div>
+    <div class="bactions">
+      <button class="bsave" onclick="saveEditedBlock()">Update Activity</button>
+      <button class="bcancel" onclick="closeEditBlock()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
