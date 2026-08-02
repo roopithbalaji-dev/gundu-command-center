@@ -1120,7 +1120,7 @@ body.force-mobile .notes-layout-v3 { grid-template-columns: 1fr !important; heig
       </select>
     </div>
     <div class="fgroup"><label class="flabel">Set 4-Digit Master PIN</label>
-      <input class="finput" type="password" id="s-pin-code" maxlength="4" placeholder="Enter 4-digit PIN (default: 1234)">
+      <input class="finput" type="password" id="s-pin-code" maxlength="4" placeholder="Enter 4-digit PIN (default: 3020)">
     </div>
     <button class="save-btn" onclick="saveSettings()">💾 Save Settings</button>
   </div>
@@ -1381,7 +1381,7 @@ let S = {
   provider:'mistral',
   streak:0,
   lastDate:null,
-  pin:'1234',
+  pin:'3020',
   pinEnabled:true,
   isUnlocked:false,
 };
@@ -2410,7 +2410,7 @@ function getEnteredPin() {
 
 function submitPin() {
   const entered = getEnteredPin();
-  const targetPin = S.pin || '1234';
+  const targetPin = S.pin || '3020';
   const errMsg = document.getElementById('pin-err-msg');
   const lockCard = document.getElementById('lock-card');
   
@@ -2480,7 +2480,7 @@ function openSettings(){
   document.getElementById('s-view-mode').value=S.user.viewMode||'auto';
   document.getElementById('s-notif').value=S.user.notifications||'on';
   document.getElementById('s-pin-enabled').value=S.pinEnabled!==false?'on':'off';
-  document.getElementById('s-pin-code').value=S.pin||'1234';
+  document.getElementById('s-pin-code').value=S.pin||'3020';
   document.querySelectorAll('.dsel-btn').forEach(b=>b.classList.toggle('sel',b.dataset.d===S.user.groceryDay));
   document.getElementById('settings-modal').style.display='flex';
 }
