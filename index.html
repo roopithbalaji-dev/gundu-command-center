@@ -847,6 +847,25 @@ body.force-mobile .notes-layout-v3 { grid-template-columns: 1fr !important; heig
 .hm-foot-btn.primary { background: linear-gradient(135deg, var(--rose), var(--accent)); color: #fff; border: none; box-shadow: 0 4px 12px var(--rose-dim); }
 
 </style>
+
+<!-- Firebase SDK (compat — no build step required) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCws3aILD3t2jGXAojGvTn1xYMNvItt4QI",
+    authDomain: "gundu-c4635.firebaseapp.com",
+    databaseURL: "https://gundu-c4635-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "gundu-c4635",
+    storageBucket: "gundu-c4635.firebasestorage.app",
+    messagingSenderId: "624998355132",
+    appId: "1:624998355132:web:6c583729e76b424859c0b9"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const database = firebase.database();
+</script>
 </head>
 <body>
 <div class="app">
@@ -877,7 +896,7 @@ body.force-mobile .notes-layout-v3 { grid-template-columns: 1fr !important; heig
         <span id="theme-icon">🌙 Switch</span>
       </button>
       <button class="settings-btn" onclick="openSettings()">⚙️ Settings</button>
-      <button class="settings-btn" onclick="lockApp()" style="color:var(--rose)">🔒 Lock Dashboard</button>
+      <button class="settings-btn" onclick="signOut()" style="color:var(--accent);">🚪 Sign Out</button>
     </div>
   </nav>
 
@@ -1113,33 +1132,37 @@ body.force-mobile .notes-layout-v3 { grid-template-columns: 1fr !important; heig
         <option value="off">OFF — Gentle mode</option>
       </select>
     </div>
-    <div class="fgroup"><label class="flabel">Master PIN Lock Security</label>
-      <select class="finput" id="s-pin-enabled">
-        <option value="on">🔒 Enabled (PIN Required on Launch)</option>
-        <option value="off">🔓 Disabled (Open Access)</option>
-      </select>
-    </div>
-    <div class="fgroup"><label class="flabel">Set 4-Digit Master PIN</label>
-      <input class="finput" type="password" id="s-pin-code" maxlength="4" placeholder="Enter 4-digit PIN (default: 3020)">
+    <div class="fgroup"><label class="flabel">Account</label>
+      <p style="font-size:12px;color:var(--text-muted);padding:8px 0;">Signed in as <strong id="s-user-email"></strong></p>
     </div>
     <button class="save-btn" onclick="saveSettings()">💾 Save Settings</button>
   </div>
 </div>
 
-<!-- MASTER PIN LOCK OVERLAY -->
-<div class="lock-screen-bg" id="lock-screen" style="display:none">
-  <div class="lock-card" id="lock-card">
-    <div class="lock-icon">🔒</div>
-    <div class="lock-title">GUNDU Command Center</div>
-    <div class="lock-sub">Enter your 4-digit Master PIN to unlock</div>
-    <div class="pin-input-wrap">
-      <input type="password" maxlength="1" class="pin-digit-inp" id="pin-1" oninput="pinNext(1)" onkeydown="pinBack(event,1)" autocomplete="off">
-      <input type="password" maxlength="1" class="pin-digit-inp" id="pin-2" oninput="pinNext(2)" onkeydown="pinBack(event,2)" autocomplete="off">
-      <input type="password" maxlength="1" class="pin-digit-inp" id="pin-3" oninput="pinNext(3)" onkeydown="pinBack(event,3)" autocomplete="off">
-      <input type="password" maxlength="1" class="pin-digit-inp" id="pin-4" oninput="pinNext(4)" onkeydown="pinBack(event,4)" autocomplete="off">
+<!-- FIREBASE LOGIN SCREEN -->
+<div id="login-screen" style="position:fixed;inset:0;background:var(--bg);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn 0.3s ease;">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:40px 36px;width:400px;max-width:95vw;text-align:center;box-shadow:0 25px 60px rgba(0,0,0,0.18);position:relative;overflow:hidden;">
+    <div style="position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--rose),var(--accent),var(--amber));"></div>
+    <div style="font-size:42px;margin-bottom:12px;">⚡</div>
+    <h2 style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;margin-bottom:6px;color:var(--text);">Welcome to GUNDU</h2>
+    <p style="font-size:13px;color:var(--text-muted);margin-bottom:28px;">Sign in to access your personal command center</p>
+    <div style="margin-bottom:14px;text-align:left;">
+      <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:6px;">Email</label>
+      <input id="login-email" type="email" placeholder="your@email.com"
+        style="width:100%;padding:12px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;font-family:'Outfit',sans-serif;outline:none;box-sizing:border-box;"
+        onkeydown="if(event.key==='Enter')document.getElementById('login-pass').focus()">
     </div>
-    <div class="pin-err-msg" id="pin-err-msg">❌ Incorrect PIN. Please try again.</div>
-    <button class="unlock-btn" onclick="submitPin()">Unlock Dashboard ⚡</button>
+    <div style="margin-bottom:20px;text-align:left;">
+      <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:6px;">Password</label>
+      <input id="login-pass" type="password" placeholder="••••••••"
+        style="width:100%;padding:12px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;font-family:'Outfit',sans-serif;outline:none;box-sizing:border-box;"
+        onkeydown="if(event.key==='Enter')signIn()">
+    </div>
+    <p id="login-error" style="font-size:12px;color:var(--accent);font-weight:600;min-height:18px;margin-bottom:12px;display:none;"></p>
+    <button onclick="signIn()" id="signin-btn"
+      style="width:100%;padding:14px;border-radius:10px;background:linear-gradient(135deg,var(--rose),var(--accent));color:#fff;font-size:14px;font-weight:600;border:none;cursor:pointer;font-family:'Outfit',sans-serif;box-shadow:0 4px 16px rgba(200,90,124,0.3);transition:all 0.2s;">
+      Sign In →
+    </button>
   </div>
 </div>
 
@@ -1381,20 +1404,25 @@ let S = {
   provider:'mistral',
   streak:0,
   lastDate:null,
-  pin:'3020',
-  pinEnabled:true,
-  isUnlocked:false,
 };
 
+let currentUser = null; // set by Firebase auth state listener
+
 // ---- STORAGE & THEME ----
-function save(){localStorage.setItem('gundu_v3',JSON.stringify(S));}
+function save(){
+  if(!currentUser)return;
+  database.ref('users/'+currentUser.uid+'/gundu_v3').set(S)
+    .catch(err=>console.error('Save failed:',err));
+}
 function load(){
-  const d=localStorage.getItem('gundu_v3');
-  if(!d)return;
-  try{
-    const p=JSON.parse(d);
-    Object.keys(p).forEach(k=>{if(k in S)S[k]=p[k];});
-  }catch(e){}
+  if(!currentUser)return Promise.resolve();
+  return database.ref('users/'+currentUser.uid+'/gundu_v3').once('value')
+    .then(snapshot=>{
+      const data=snapshot.val();
+      if(!data)return;
+      Object.keys(data).forEach(k=>{if(k in S)S[k]=data[k];});
+    })
+    .catch(err=>console.error('Load failed:',err));
 }
 
 function applyTheme(){
@@ -2382,86 +2410,33 @@ function saveNote(){
   n.at=Date.now();save();
 }
 
-// ---- MASTER PIN SECURITY LOGIC ----
-function pinNext(idx) {
-  const current = document.getElementById('pin-' + idx);
-  if (current.value.length === 1 && idx < 4) {
-    document.getElementById('pin-' + (idx + 1)).focus();
+// ---- FIREBASE AUTH ----
+function signIn(){
+  const email=document.getElementById('login-email').value.trim();
+  const pass=document.getElementById('login-pass').value;
+  const errEl=document.getElementById('login-error');
+  const btn=document.getElementById('signin-btn');
+  if(!email||!pass){
+    errEl.textContent='Please enter your email and password.';
+    errEl.style.display='block';
+    return;
   }
-  if (idx === 4 && getEnteredPin().length === 4) {
-    submitPin();
-  }
-}
-
-function pinBack(e, idx) {
-  if (e.key === 'Backspace' && !document.getElementById('pin-' + idx).value && idx > 1) {
-    document.getElementById('pin-' + (idx - 1)).focus();
-  }
-}
-
-function getEnteredPin() {
-  return (
-    (document.getElementById('pin-1')?.value || '') +
-    (document.getElementById('pin-2')?.value || '') +
-    (document.getElementById('pin-3')?.value || '') +
-    (document.getElementById('pin-4')?.value || '')
-  );
-}
-
-function submitPin() {
-  const entered = getEnteredPin();
-  const targetPin = S.pin || '3020';
-  const errMsg = document.getElementById('pin-err-msg');
-  const lockCard = document.getElementById('lock-card');
-  
-  if (entered === targetPin) {
-    S.isUnlocked = true;
-    if (errMsg) errMsg.style.display = 'none';
-    const lockOverlay = document.getElementById('lock-screen');
-    if (lockOverlay) {
-      lockOverlay.style.animation = 'fadeOut 0.25s ease forwards';
-      setTimeout(() => {
-        lockOverlay.style.display = 'none';
-        lockOverlay.style.animation = '';
-      }, 250);
-    }
-    showToast('🔓', 'Dashboard Unlocked', 'Welcome back to GUNDU Command Center.');
-  } else {
-    if (errMsg) errMsg.style.display = 'block';
-    if (lockCard) {
-      lockCard.classList.remove('shake-anim');
-      void lockCard.offsetWidth;
-      lockCard.classList.add('shake-anim');
-    }
-    [1, 2, 3, 4].forEach(i => {
-      const el = document.getElementById('pin-' + i);
-      if (el) el.value = '';
+  btn.textContent='Signing in…';
+  btn.disabled=true;
+  errEl.style.display='none';
+  auth.signInWithEmailAndPassword(email,pass)
+    .catch(err=>{
+      btn.textContent='Sign In →';
+      btn.disabled=false;
+      errEl.textContent=(err.code==='auth/invalid-credential'||err.code==='auth/wrong-password'||err.code==='auth/user-not-found')
+        ?'Incorrect email or password.':err.message;
+      errEl.style.display='block';
     });
-    document.getElementById('pin-1')?.focus();
-  }
 }
 
-function lockApp() {
-  S.isUnlocked = false;
-  [1, 2, 3, 4].forEach(i => {
-    const el = document.getElementById('pin-' + i);
-    if (el) el.value = '';
-  });
-  const errMsg = document.getElementById('pin-err-msg');
-  if (errMsg) errMsg.style.display = 'none';
-  const lockOverlay = document.getElementById('lock-screen');
-  if (lockOverlay) {
-    lockOverlay.style.display = 'flex';
-  }
-  setTimeout(() => document.getElementById('pin-1')?.focus(), 100);
-}
-
-function checkLockStatus() {
-  if (S.pinEnabled !== false && !S.isUnlocked) {
-    lockApp();
-  } else {
-    document.getElementById('lock-screen').style.display = 'none';
-  }
+function signOut(){
+  if(!confirm('Sign out of GUNDU?'))return;
+  auth.signOut();
 }
 
 // ---- SETTINGS ----
@@ -2479,8 +2454,8 @@ function openSettings(){
   document.getElementById('s-wake').value=S.user.wakeUp||'09:00';
   document.getElementById('s-view-mode').value=S.user.viewMode||'auto';
   document.getElementById('s-notif').value=S.user.notifications||'on';
-  document.getElementById('s-pin-enabled').value=S.pinEnabled!==false?'on':'off';
-  document.getElementById('s-pin-code').value=S.pin||'3020';
+  const emailEl=document.getElementById('s-user-email');
+  if(emailEl&&currentUser)emailEl.textContent=currentUser.email;
   document.querySelectorAll('.dsel-btn').forEach(b=>b.classList.toggle('sel',b.dataset.d===S.user.groceryDay));
   document.getElementById('settings-modal').style.display='flex';
 }
@@ -2492,11 +2467,6 @@ function saveSettings(){
   S.user.wakeUp=document.getElementById('s-wake').value;
   S.user.viewMode=document.getElementById('s-view-mode').value;
   S.user.notifications=document.getElementById('s-notif').value;
-  S.pinEnabled=document.getElementById('s-pin-enabled').value==='on';
-  const pinInput=document.getElementById('s-pin-code').value.trim();
-  if(pinInput.length===4 && /^\d+$/.test(pinInput)) {
-    S.pin=pinInput;
-  }
   const sel=document.querySelector('.dsel-btn.sel');if(sel)S.user.groceryDay=sel.dataset.d;
   save();applyViewMode();updateUserDisplay();renderTimeline();renderWeek();renderGrocery();renderMealTable();closeSettings();
   showToast('✅','Settings Saved!',`Dashboard updated for ${S.user.name}.`);
@@ -2527,26 +2497,35 @@ function checkStreak(){
   save();
 }
 
-// ---- INIT ----
-function init(){
-  load();applyTheme();applyViewMode();checkStreak();
-  tickClock();setInterval(tickClock,1000);
-  setInterval(checkNotifs,60000);
-  window.addEventListener('resize', applyViewMode);
-  updateGermanBtn();updateUserDisplay();
-  renderEgoBanner();renderTimeline();renderHabits();
-  renderTodayMeals();renderWeek();renderMealTable();
-  renderGrocery();renderGoals();renderNotes();renderTodos();initChat();loadKey();updateStats();
-  checkLockStatus();
-  if('Notification'in window&&Notification.permission==='default'){
-    setTimeout(()=>Notification.requestPermission().then(p=>{
-      if(p==='granted')showToast('🔔','Notifications Active','Ego push notifications enabled.');
-    }),3000);
+// ---- INIT (via Firebase Auth) ----
+auth.onAuthStateChanged(user=>{
+  const loginScreen=document.getElementById('login-screen');
+  if(user){
+    currentUser=user;
+    loginScreen.style.display='none';
+    load().then(()=>{
+      applyTheme();applyViewMode();checkStreak();
+      tickClock();setInterval(tickClock,1000);
+      setInterval(checkNotifs,60000);
+      window.addEventListener('resize',applyViewMode);
+      updateGermanBtn();updateUserDisplay();
+      renderEgoBanner();renderTimeline();renderHabits();
+      renderTodayMeals();renderWeek();renderMealTable();
+      renderGrocery();renderGoals();renderNotes();renderTodos();initChat();loadKey();updateStats();
+      if('Notification'in window&&Notification.permission==='default'){
+        setTimeout(()=>Notification.requestPermission().then(p=>{
+          if(p==='granted')showToast('🔔','Notifications Active','Ego push notifications enabled.');
+        }),3000);
+      }
+      setTimeout(()=>showToast('✨','Welcome back to GUNDU','Your personal command center is ready.'),1000);
+    });
+  } else {
+    currentUser=null;
+    loginScreen.style.display='flex';
+    const btn=document.getElementById('signin-btn');
+    if(btn){btn.textContent='Sign In →';btn.disabled=false;}
   }
-  setTimeout(()=>showToast('✨','Welcome to GUNDU Command Center','Your elegant daily planner is active. Morning window: 9:00 AM to 1:20 PM.'),1500);
-}
-
-init();
+});
 
 </script>
 
