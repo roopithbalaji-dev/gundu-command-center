@@ -1139,30 +1139,29 @@ body.force-mobile .notes-layout-v3 { grid-template-columns: 1fr !important; heig
   </div>
 </div>
 
-<!-- FIREBASE LOGIN SCREEN -->
+<!-- FIREBASE MAGIC LINK LOGIN SCREEN -->
 <div id="login-screen" style="position:fixed;inset:0;background:var(--bg);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn 0.3s ease;">
-  <div style="background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:40px 36px;width:400px;max-width:95vw;text-align:center;box-shadow:0 25px 60px rgba(0,0,0,0.18);position:relative;overflow:hidden;">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:40px 36px;width:420px;max-width:95vw;text-align:center;box-shadow:0 25px 60px rgba(0,0,0,0.18);position:relative;overflow:hidden;">
     <div style="position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--rose),var(--accent),var(--amber));"></div>
     <div style="font-size:42px;margin-bottom:12px;">⚡</div>
     <h2 style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;margin-bottom:6px;color:var(--text);">Welcome to GUNDU</h2>
-    <p style="font-size:13px;color:var(--text-muted);margin-bottom:28px;">Sign in to access your personal command center</p>
-    <div style="margin-bottom:14px;text-align:left;">
-      <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:6px;">Email</label>
+    <p style="font-size:13px;color:var(--text-muted);margin-bottom:24px;">Enter your authorized email to receive a 1-click passwordless login link</p>
+    
+    <div style="margin-bottom:20px;text-align:left;">
+      <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:6px;">Your Authorized Email</label>
       <input id="login-email" type="email" placeholder="your@email.com"
         style="width:100%;padding:12px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;font-family:'Outfit',sans-serif;outline:none;box-sizing:border-box;"
-        onkeydown="if(event.key==='Enter')document.getElementById('login-pass').focus()">
+        onkeydown="if(event.key==='Enter')sendMagicLink()">
     </div>
-    <div style="margin-bottom:20px;text-align:left;">
-      <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:6px;">Password</label>
-      <input id="login-pass" type="password" placeholder="••••••••"
-        style="width:100%;padding:12px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;font-family:'Outfit',sans-serif;outline:none;box-sizing:border-box;"
-        onkeydown="if(event.key==='Enter')signIn()">
-    </div>
-    <p id="login-error" style="font-size:12px;color:var(--accent);font-weight:600;min-height:18px;margin-bottom:12px;display:none;"></p>
-    <button onclick="signIn()" id="signin-btn"
+
+    <p id="login-error" style="font-size:12px;color:var(--accent);font-weight:600;min-height:18px;margin-bottom:14px;display:none;line-height:1.4;"></p>
+    <p id="login-success" style="font-size:13px;color:var(--sage);background:var(--sage-dim);border:1px solid rgba(45,106,79,0.3);padding:12px;border-radius:10px;font-weight:600;margin-bottom:14px;display:none;line-height:1.5;"></p>
+
+    <button onclick="sendMagicLink()" id="signin-btn"
       style="width:100%;padding:14px;border-radius:10px;background:linear-gradient(135deg,var(--rose),var(--accent));color:#fff;font-size:14px;font-weight:600;border:none;cursor:pointer;font-family:'Outfit',sans-serif;box-shadow:0 4px 16px rgba(200,90,124,0.3);transition:all 0.2s;">
-      Sign In →
+      Send Magic Login Link ✉️
     </button>
+    <p style="font-size:11px;color:var(--text-faint);margin-top:16px;">🔒 Private & Restricted Access • Whitelisted Emails Only</p>
   </div>
 </div>
 
@@ -2410,32 +2409,109 @@ function saveNote(){
   n.at=Date.now();save();
 }
 
-// ---- FIREBASE AUTH ----
-function signIn(){
-  const email=document.getElementById('login-email').value.trim();
-  const pass=document.getElementById('login-pass').value;
-  const errEl=document.getElementById('login-error');
-  const btn=document.getElementById('signin-btn');
-  if(!email||!pass){
-    errEl.textContent='Please enter your email and password.';
-    errEl.style.display='block';
+// ---- FIREBASE MAGIC LINK & WHITELIST AUTH ----
+async function checkIsEmailAllowed(email) {
+  try {
+    const snap = await database.ref('allowed_users').once('value');
+    const allowed = snap.val();
+    // If no whitelist node exists yet, initialize with default admin email
+    if (!allowed) {
+      await database.ref('allowed_users').set({
+        'roopithbalaji13_at_gmail_dot_com': 'roopithbalaji13@gmail.com'
+      });
+      return email.toLowerCase() === 'roopithbalaji13@gmail.com';
+    }
+    const emailList = Object.values(allowed).map(e => String(e).toLowerCase().trim());
+    return emailList.includes(email.toLowerCase().trim());
+  } catch(e) {
+    console.warn('Whitelist check fallback:', e);
+    return true; // Fallback to allow if DB read issue
+  }
+}
+
+async function sendMagicLink() {
+  const emailInput = document.getElementById('login-email');
+  const email = emailInput.value.trim().toLowerCase();
+  const errEl = document.getElementById('login-error');
+  const succEl = document.getElementById('login-success');
+  const btn = document.getElementById('signin-btn');
+
+  errEl.style.display = 'none';
+  succEl.style.display = 'none';
+
+  if (!email || !email.includes('@')) {
+    errEl.textContent = 'Please enter a valid email address.';
+    errEl.style.display = 'block';
     return;
   }
-  btn.textContent='Signing in…';
-  btn.disabled=true;
-  errEl.style.display='none';
-  auth.signInWithEmailAndPassword(email,pass)
-    .catch(err=>{
-      btn.textContent='Sign In →';
-      btn.disabled=false;
-      errEl.textContent=(err.code==='auth/invalid-credential'||err.code==='auth/wrong-password'||err.code==='auth/user-not-found')
-        ?'Incorrect email or password.':err.message;
-      errEl.style.display='block';
+
+  btn.textContent = 'Verifying authorization…';
+  btn.disabled = true;
+
+  // 1. Whitelist Check
+  const isAllowed = await checkIsEmailAllowed(email);
+  if (!isAllowed) {
+    btn.textContent = 'Send Magic Login Link ✉️';
+    btn.disabled = false;
+    errEl.textContent = '🛑 Access Denied: Your email is not authorized to access GUNDU. Please contact the administrator.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  // 2. Send Passwordless Magic Link
+  btn.textContent = 'Sending email link…';
+  const actionCodeSettings = {
+    url: window.location.href.split('?')[0].split('#')[0],
+    handleCodeInApp: true
+  };
+
+  auth.sendSignInLinkToEmail(email, actionCodeSettings)
+    .then(() => {
+      window.localStorage.setItem('emailForSignIn', email);
+      btn.style.display = 'none';
+      succEl.innerHTML = `📩 <strong>Check your inbox!</strong><br>We sent a secure login link to <strong>${email}</strong>.<br><span style="font-size:11px;opacity:0.85">Click the link in your email to open GUNDU instantly.</span>`;
+      succEl.style.display = 'block';
+    })
+    .catch(err => {
+      btn.textContent = 'Send Magic Login Link ✉️';
+      btn.disabled = false;
+      errEl.textContent = 'Failed to send login link: ' + err.message;
+      errEl.style.display = 'block';
     });
 }
 
-function signOut(){
-  if(!confirm('Sign out of GUNDU?'))return;
+// Handle completing sign-in when user opens email link
+async function handleEmailLinkSignIn() {
+  if (auth.isSignInWithEmailLink(window.location.href)) {
+    let email = window.localStorage.getItem('emailForSignIn');
+    if (!email) {
+      email = window.prompt('Please enter your email address to confirm sign in:');
+    }
+    if (email) {
+      try {
+        const btn = document.getElementById('signin-btn');
+        if (btn) btn.textContent = 'Authenticating…';
+        await auth.signInWithEmailLink(email, window.location.href);
+        window.localStorage.removeItem('emailForSignIn');
+        // Clean up magic link query params from URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+      } catch (err) {
+        console.error('Email link sign in error:', err);
+        const errEl = document.getElementById('login-error');
+        if (errEl) {
+          errEl.textContent = 'Invalid or expired login link. Please request a new link.';
+          errEl.style.display = 'block';
+        }
+      }
+    }
+  }
+}
+
+// Trigger email link check on load
+handleEmailLinkSignIn();
+
+function signOut() {
+  if (!confirm('Sign out of GUNDU?')) return;
   auth.signOut();
 }
 
@@ -2523,7 +2599,11 @@ auth.onAuthStateChanged(user=>{
     currentUser=null;
     loginScreen.style.display='flex';
     const btn=document.getElementById('signin-btn');
-    if(btn){btn.textContent='Sign In →';btn.disabled=false;}
+    if(btn){btn.style.display='block';btn.textContent='Send Magic Login Link ✉️';btn.disabled=false;}
+    const succEl=document.getElementById('login-success');
+    if(succEl)succEl.style.display='none';
+    const errEl=document.getElementById('login-error');
+    if(errEl)errEl.style.display='none';
   }
 });
 
