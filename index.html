@@ -2561,6 +2561,13 @@ async function sendMagicLink() {
       succEl.style.display = 'block';
     })
     .catch(err => {
+      btn.textContent = 'Send Magic Link / Request Access ✉️';
+      btn.disabled = false;
+      errEl.textContent = 'Failed to send login link: ' + err.message;
+      errEl.style.display = 'block';
+    });
+}
+
 function switchLoginTab(tab) {
   const customerPanel = document.getElementById('login-panel-customer');
   const ownerPanel = document.getElementById('login-panel-owner');
