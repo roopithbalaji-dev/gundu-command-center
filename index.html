@@ -895,6 +895,7 @@ body.force-mobile .notes-layout-v3 { grid-template-columns: 1fr !important; heig
         <span id="theme-lbl">☀️ Light Mode</span>
         <span id="theme-icon">🌙 Switch</span>
       </button>
+      <button class="settings-btn" id="admin-control-btn" onclick="openAdminAccessModal()" style="display:none;color:var(--amber);font-weight:600;">👑 Access Control</button>
       <button class="settings-btn" onclick="openSettings()">⚙️ Settings</button>
       <button class="settings-btn" onclick="signOut()" style="color:var(--accent);">🚪 Sign Out</button>
     </div>
@@ -1182,6 +1183,35 @@ body.force-mobile .notes-layout-v3 { grid-template-columns: 1fr !important; heig
     <div class="bactions">
       <button class="bsave" onclick="saveBlock()">Add Block</button>
       <button class="bcancel" onclick="closeBlock()">Cancel</button>
+    </div>
+  </div>
+<!-- ADMIN ACCESS CONTROL MODAL -->
+<div class="modal-bg" id="admin-access-modal" style="display:none">
+  <div class="modal" style="width:520px;max-width:95vw;">
+    <button class="mclose" onclick="closeAdminAccessModal()">✕</button>
+    <div class="modal-title">👑 Admin Access Control</div>
+    <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px;">Manage customer access requests and approved users for GUNDU.</p>
+    
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:18px;">
+      <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:6px;">Pre-Approve New Email</label>
+      <div style="display:flex;gap:8px;">
+        <input id="admin-add-email" type="email" placeholder="customer@email.com" class="finput" style="flex:1;">
+        <button onclick="adminApproveEmailInput()" style="padding:8px 14px;border-radius:10px;background:var(--sage);color:#fff;font-size:12px;font-weight:600;border:none;cursor:pointer;">+ Approve</button>
+      </div>
+    </div>
+
+    <div style="margin-bottom:18px;">
+      <h4 style="font-size:13px;font-weight:700;color:var(--amber);margin-bottom:8px;">⏳ Pending Access Requests</h4>
+      <div id="admin-pending-list" style="max-height:160px;overflow-y:auto;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:8px;">
+        <p style="font-size:12px;color:var(--text-faint);padding:8px;text-align:center;">No pending access requests.</p>
+      </div>
+    </div>
+
+    <div>
+      <h4 style="font-size:13px;font-weight:700;color:var(--sage);margin-bottom:8px;">✅ Approved Users</h4>
+      <div id="admin-approved-list" style="max-height:180px;overflow-y:auto;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:8px;">
+        <p style="font-size:12px;color:var(--text-faint);padding:8px;text-align:center;">Loading approved users...</p>
+      </div>
     </div>
   </div>
 </div>
@@ -2409,23 +2439,29 @@ function saveNote(){
   n.at=Date.now();save();
 }
 
-// ---- FIREBASE MAGIC LINK & WHITELIST AUTH ----
+// ---- FIREBASE MAGIC LINK & ADMIN APPROVAL AUTH ----
+const ADMIN_EMAIL = 'roopithbalaji@gmail.com';
+
+function sanitizeEmailKey(email) {
+  return email.toLowerCase().replace(/[^a-z0-9]/g, '_');
+}
+
 async function checkIsEmailAllowed(email) {
+  const cleanEmail = email.toLowerCase().trim();
+  if (cleanEmail === ADMIN_EMAIL) return true;
   try {
     const snap = await database.ref('allowed_users').once('value');
     const allowed = snap.val();
-    // If no whitelist node exists yet, initialize with default admin email
     if (!allowed) {
-      await database.ref('allowed_users').set({
-        'roopithbalaji13_at_gmail_dot_com': 'roopithbalaji13@gmail.com'
-      });
-      return email.toLowerCase() === 'roopithbalaji13@gmail.com';
+      // Seed default owner email
+      await database.ref('allowed_users/' + sanitizeEmailKey(ADMIN_EMAIL)).set(ADMIN_EMAIL);
+      return cleanEmail === ADMIN_EMAIL;
     }
     const emailList = Object.values(allowed).map(e => String(e).toLowerCase().trim());
-    return emailList.includes(email.toLowerCase().trim());
+    return emailList.includes(cleanEmail);
   } catch(e) {
     console.warn('Whitelist check fallback:', e);
-    return true; // Fallback to allow if DB read issue
+    return cleanEmail === ADMIN_EMAIL;
   }
 }
 
@@ -2451,14 +2487,22 @@ async function sendMagicLink() {
   // 1. Whitelist Check
   const isAllowed = await checkIsEmailAllowed(email);
   if (!isAllowed) {
+    // Record request for Admin manual approval
+    const reqKey = sanitizeEmailKey(email);
+    await database.ref('access_requests/' + reqKey).set({
+      email: email,
+      requestedAt: Date.now(),
+      status: 'pending'
+    });
+
     btn.textContent = 'Send Magic Login Link ✉️';
     btn.disabled = false;
-    errEl.textContent = '🛑 Access Denied: Your email is not authorized to access GUNDU. Please contact the administrator.';
-    errEl.style.display = 'block';
+    succEl.innerHTML = `⏳ <strong>Access Request Submitted!</strong><br>Your email <strong>${email}</strong> has been submitted to the Owner for manual approval.<br><span style="font-size:11px;opacity:0.85">Once approved, click "Send Magic Login Link" to sign in.</span>`;
+    succEl.style.display = 'block';
     return;
   }
 
-  // 2. Send Passwordless Magic Link
+  // 2. Send Passwordless Magic Link if Authorized
   btn.textContent = 'Sending email link…';
   const actionCodeSettings = {
     url: window.location.href.split('?')[0].split('#')[0],
@@ -2573,12 +2617,97 @@ function checkStreak(){
   save();
 }
 
+// ---- ADMIN ACCESS CONTROL PANEL ----
+function openAdminAccessModal() {
+  document.getElementById('admin-access-modal').style.display = 'flex';
+  loadAdminAccessData();
+}
+
+function closeAdminAccessModal() {
+  document.getElementById('admin-access-modal').style.display = 'none';
+}
+
+function loadAdminAccessData() {
+  const pendingContainer = document.getElementById('admin-pending-list');
+  const approvedContainer = document.getElementById('admin-approved-list');
+
+  // 1. Load Pending Requests
+  database.ref('access_requests').on('value', snap => {
+    const data = snap.val() || {};
+    const requests = Object.values(data).filter(r => r.status === 'pending');
+    if (requests.length === 0) {
+      pendingContainer.innerHTML = `<p style="font-size:12px;color:var(--text-faint);padding:8px;text-align:center;">No pending access requests.</p>`;
+    } else {
+      pendingContainer.innerHTML = requests.map(r => `
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px;border-bottom:1px solid var(--border);">
+          <div>
+            <div style="font-size:12px;font-weight:600;color:var(--text);">${r.email}</div>
+            <div style="font-size:10px;color:var(--text-muted);">${new Date(r.requestedAt).toLocaleString()}</div>
+          </div>
+          <div style="display:flex;gap:6px;">
+            <button onclick="adminApproveEmail('${r.email}')" style="padding:4px 8px;background:var(--sage);color:#fff;border-radius:6px;font-size:11px;font-weight:600;border:none;cursor:pointer;">Approve ✅</button>
+            <button onclick="adminRejectRequest('${r.email}')" style="padding:4px 8px;background:var(--accent-dim);color:var(--accent);border-radius:6px;font-size:11px;font-weight:600;border:none;cursor:pointer;">Reject ✕</button>
+          </div>
+        </div>
+      `).join('');
+    }
+  });
+
+  // 2. Load Approved Users
+  database.ref('allowed_users').on('value', snap => {
+    const data = snap.val() || {};
+    const emails = Object.values(data);
+    if (emails.length === 0) {
+      approvedContainer.innerHTML = `<p style="font-size:12px;color:var(--text-faint);padding:8px;text-align:center;">No approved users found.</p>`;
+    } else {
+      approvedContainer.innerHTML = emails.map(e => {
+        const isOwner = e.toLowerCase() === ADMIN_EMAIL;
+        return `
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px;border-bottom:1px solid var(--border);">
+          <span style="font-size:12px;font-weight:600;color:var(--text);">${e} ${isOwner ? '<span style="font-size:10px;color:var(--amber);background:var(--amber-dim);padding:2px 6px;border-radius:4px;margin-left:4px;">Owner</span>' : ''}</span>
+          ${!isOwner ? `<button onclick="adminRevokeEmail('${e}')" style="padding:4px 8px;background:var(--accent-dim);color:var(--accent);border-radius:6px;font-size:11px;font-weight:600;border:none;cursor:pointer;">Revoke 🗑️</button>` : ''}
+        </div>`;
+      }).join('');
+    }
+  });
+}
+
+async function adminApproveEmail(email) {
+  const reqKey = sanitizeEmailKey(email);
+  await database.ref('allowed_users/' + reqKey).set(email);
+  await database.ref('access_requests/' + reqKey).remove();
+  showToast('✅', 'User Approved', `${email} has been granted access to GUNDU.`);
+}
+
+async function adminRejectRequest(email) {
+  const reqKey = sanitizeEmailKey(email);
+  await database.ref('access_requests/' + reqKey).remove();
+  showToast('🗑️', 'Request Rejected', `Access request for ${email} was rejected.`);
+}
+
+async function adminRevokeEmail(email) {
+  if (!confirm(`Revoke access for ${email}?`)) return;
+  const reqKey = sanitizeEmailKey(email);
+  await database.ref('allowed_users/' + reqKey).remove();
+  showToast('🗑️', 'Access Revoked', `${email} has been removed from allowed users.`);
+}
+
+async function adminApproveEmailInput() {
+  const input = document.getElementById('admin-add-email');
+  const email = input.value.trim().toLowerCase();
+  if (!email || !email.includes('@')) return;
+  await adminApproveEmail(email);
+  input.value = '';
+}
+
 // ---- INIT (via Firebase Auth) ----
 auth.onAuthStateChanged(user=>{
   const loginScreen=document.getElementById('login-screen');
+  const adminBtn=document.getElementById('admin-control-btn');
   if(user){
     currentUser=user;
     loginScreen.style.display='none';
+    if(adminBtn) adminBtn.style.display = (user.email && user.email.toLowerCase() === ADMIN_EMAIL) ? 'block' : 'none';
     load().then(()=>{
       applyTheme();applyViewMode();checkStreak();
       tickClock();setInterval(tickClock,1000);
@@ -2597,6 +2726,7 @@ auth.onAuthStateChanged(user=>{
     });
   } else {
     currentUser=null;
+    if(adminBtn) adminBtn.style.display = 'none';
     loginScreen.style.display='flex';
     const btn=document.getElementById('signin-btn');
     if(btn){btn.style.display='block';btn.textContent='Send Magic Login Link ✉️';btn.disabled=false;}
