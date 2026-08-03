@@ -2440,28 +2440,34 @@ function saveNote(){
 }
 
 // ---- FIREBASE MAGIC LINK & ADMIN APPROVAL AUTH ----
+const ADMIN_EMAILS = ['roopithbalaji@gmail.com', 'roopithbalaji13@gmail.com'];
 const ADMIN_EMAIL = 'roopithbalaji@gmail.com';
 
 function sanitizeEmailKey(email) {
   return email.toLowerCase().replace(/[^a-z0-9]/g, '_');
 }
 
+function isOwnerEmail(email) {
+  return ADMIN_EMAILS.includes(email.toLowerCase().trim());
+}
+
 async function checkIsEmailAllowed(email) {
   const cleanEmail = email.toLowerCase().trim();
-  if (cleanEmail === ADMIN_EMAIL) return true;
+  // Owners are ALWAYS allowed immediately (no DB lookup needed)
+  if (isOwnerEmail(cleanEmail)) return true;
+  
   try {
-    const snap = await database.ref('allowed_users').once('value');
+    // 2-second promise timeout so DB never hangs UI
+    const dbPromise = database.ref('allowed_users').once('value');
+    const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 2000));
+    const snap = await Promise.race([dbPromise, timeoutPromise]);
     const allowed = snap.val();
-    if (!allowed) {
-      // Seed default owner email
-      await database.ref('allowed_users/' + sanitizeEmailKey(ADMIN_EMAIL)).set(ADMIN_EMAIL);
-      return cleanEmail === ADMIN_EMAIL;
-    }
+    if (!allowed) return false;
     const emailList = Object.values(allowed).map(e => String(e).toLowerCase().trim());
     return emailList.includes(cleanEmail);
   } catch(e) {
     console.warn('Whitelist check fallback:', e);
-    return cleanEmail === ADMIN_EMAIL;
+    return false; // Deny unapproved users by default if DB unreadable
   }
 }
 
@@ -2489,11 +2495,15 @@ async function sendMagicLink() {
   if (!isAllowed) {
     // Record request for Admin manual approval
     const reqKey = sanitizeEmailKey(email);
-    await database.ref('access_requests/' + reqKey).set({
-      email: email,
-      requestedAt: Date.now(),
-      status: 'pending'
-    });
+    try {
+      await database.ref('access_requests/' + reqKey).set({
+        email: email,
+        requestedAt: Date.now(),
+        status: 'pending'
+      });
+    } catch(err) {
+      console.warn('Could not record access request:', err);
+    }
 
     btn.textContent = 'Send Magic Login Link ✉️';
     btn.disabled = false;
@@ -2707,7 +2717,9 @@ auth.onAuthStateChanged(user=>{
   if(user){
     currentUser=user;
     loginScreen.style.display='none';
-    if(adminBtn) adminBtn.style.display = (user.email && user.email.toLowerCase() === ADMIN_EMAIL) ? 'block' : 'none';
+    const isOwner = user.email && isOwnerEmail(user.email);
+    if(adminBtn) adminBtn.style.display = isOwner ? 'block' : 'none';
+    
     load().then(()=>{
       applyTheme();applyViewMode();checkStreak();
       tickClock();setInterval(tickClock,1000);
@@ -2722,6 +2734,20 @@ auth.onAuthStateChanged(user=>{
           if(p==='granted')showToast('🔔','Notifications Active','Ego push notifications enabled.');
         }),3000);
       }
+      
+      // Check for pending access requests if Owner
+      if (isOwner) {
+        database.ref('access_requests').once('value').then(snap => {
+          const data = snap.val() || {};
+          const pending = Object.values(data).filter(r => r.status === 'pending');
+          if (pending.length > 0) {
+            setTimeout(() => {
+              showToast('👑', `Pending Access Requests (${pending.length})`, `${pending.length} user(s) waiting for access. Click '👑 Access Control' in sidebar to approve.`);
+            }, 2000);
+          }
+        }).catch(err => console.warn('Request check err:', err));
+      }
+
       setTimeout(()=>showToast('✨','Welcome back to GUNDU','Your personal command center is ready.'),1000);
     });
   } else {
