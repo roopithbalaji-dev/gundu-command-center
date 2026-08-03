@@ -895,7 +895,7 @@ body.force-mobile .notes-layout-v3 { grid-template-columns: 1fr !important; heig
         <span id="theme-lbl">☀️ Light Mode</span>
         <span id="theme-icon">🌙 Switch</span>
       </button>
-      <button class="settings-btn" id="admin-control-btn" onclick="openAdminAccessModal()" style="display:none;color:var(--amber);font-weight:600;">👑 Access Control</button>
+      <button class="settings-btn" id="admin-control-btn" onclick="openAdminAccessModal()" style="display:none;color:var(--amber);font-weight:600;position:relative;">👑 Access Control <span id="admin-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--accent);color:#fff;font-size:10px;font-weight:700;border-radius:50%;width:18px;height:18px;line-height:18px;text-align:center;"></span></button>
       <button class="settings-btn" onclick="openSettings()">⚙️ Settings</button>
       <button class="settings-btn" onclick="signOut()" style="color:var(--accent);">🚪 Sign Out</button>
     </div>
@@ -1140,28 +1140,62 @@ body.force-mobile .notes-layout-v3 { grid-template-columns: 1fr !important; heig
   </div>
 </div>
 
-<!-- FIREBASE MAGIC LINK LOGIN SCREEN -->
+<!-- FIREBASE 2-TAB LOGIN SCREEN -->
 <div id="login-screen" style="position:fixed;inset:0;background:var(--bg);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn 0.3s ease;">
-  <div style="background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:40px 36px;width:420px;max-width:95vw;text-align:center;box-shadow:0 25px 60px rgba(0,0,0,0.18);position:relative;overflow:hidden;">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:36px;width:440px;max-width:95vw;text-align:center;box-shadow:0 25px 60px rgba(0,0,0,0.18);position:relative;overflow:hidden;">
     <div style="position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--rose),var(--accent),var(--amber));"></div>
-    <div style="font-size:42px;margin-bottom:12px;">⚡</div>
-    <h2 style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;margin-bottom:6px;color:var(--text);">Welcome to GUNDU</h2>
-    <p style="font-size:13px;color:var(--text-muted);margin-bottom:24px;">Enter your authorized email to receive a 1-click passwordless login link</p>
-    
-    <div style="margin-bottom:20px;text-align:left;">
-      <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:6px;">Your Authorized Email</label>
-      <input id="login-email" type="email" placeholder="your@email.com"
-        style="width:100%;padding:12px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;font-family:'Outfit',sans-serif;outline:none;box-sizing:border-box;"
-        onkeydown="if(event.key==='Enter')sendMagicLink()">
+    <div style="font-size:38px;margin-bottom:8px;">⚡</div>
+    <h2 style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;margin-bottom:16px;color:var(--text);">Welcome to GUNDU</h2>
+
+    <!-- LOGIN TABS -->
+    <div style="display:flex;gap:6px;background:var(--bg2);padding:4px;border-radius:12px;margin-bottom:20px;border:1px solid var(--border);">
+      <button id="tab-btn-customer" onclick="switchLoginTab('customer')" style="flex:1;padding:8px;border-radius:8px;border:none;font-size:12px;font-weight:600;cursor:pointer;background:var(--surface);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:all 0.2s;">
+        👤 Customer Access
+      </button>
+      <button id="tab-btn-owner" onclick="switchLoginTab('owner')" style="flex:1;padding:8px;border-radius:8px;border:none;font-size:12px;font-weight:600;cursor:pointer;background:transparent;color:var(--text-muted);transition:all 0.2s;">
+        🔑 Owner Sign-In
+      </button>
     </div>
 
-    <p id="login-error" style="font-size:12px;color:var(--accent);font-weight:600;min-height:18px;margin-bottom:14px;display:none;line-height:1.4;"></p>
-    <p id="login-success" style="font-size:13px;color:var(--sage);background:var(--sage-dim);border:1px solid rgba(45,106,79,0.3);padding:12px;border-radius:10px;font-weight:600;margin-bottom:14px;display:none;line-height:1.5;"></p>
+    <!-- CUSTOMER TAB -->
+    <div id="login-panel-customer">
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:18px;">Enter your email to sign in or submit an access request to the Owner</p>
+      <div style="margin-bottom:16px;text-align:left;">
+        <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:6px;">Your Email</label>
+        <input id="login-email" type="email" placeholder="your@email.com"
+          style="width:100%;padding:12px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;font-family:'Outfit',sans-serif;outline:none;box-sizing:border-box;"
+          onkeydown="if(event.key==='Enter')sendMagicLink()">
+      </div>
+      <button onclick="sendMagicLink()" id="signin-btn"
+        style="width:100%;padding:13px;border-radius:10px;background:linear-gradient(135deg,var(--rose),var(--accent));color:#fff;font-size:14px;font-weight:600;border:none;cursor:pointer;font-family:'Outfit',sans-serif;box-shadow:0 4px 16px rgba(200,90,124,0.3);transition:all 0.2s;">
+        Send Magic Link / Request Access ✉️
+      </button>
+    </div>
 
-    <button onclick="sendMagicLink()" id="signin-btn"
-      style="width:100%;padding:14px;border-radius:10px;background:linear-gradient(135deg,var(--rose),var(--accent));color:#fff;font-size:14px;font-weight:600;border:none;cursor:pointer;font-family:'Outfit',sans-serif;box-shadow:0 4px 16px rgba(200,90,124,0.3);transition:all 0.2s;">
-      Send Magic Login Link ✉️
-    </button>
+    <!-- OWNER TAB -->
+    <div id="login-panel-owner" style="display:none;">
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:18px;">Owner Password Authentication (Instant Dashboard Access)</p>
+      <div style="margin-bottom:12px;text-align:left;">
+        <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:6px;">Owner Email</label>
+        <input id="owner-email" type="email" value="roopithbalaji@gmail.com" placeholder="roopithbalaji@gmail.com"
+          style="width:100%;padding:12px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;font-family:'Outfit',sans-serif;outline:none;box-sizing:border-box;">
+      </div>
+      <div style="margin-bottom:16px;text-align:left;">
+        <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:6px;">Password</label>
+        <input id="owner-pass" type="password" placeholder="••••••••"
+          style="width:100%;padding:12px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;font-family:'Outfit',sans-serif;outline:none;box-sizing:border-box;"
+          onkeydown="if(event.key==='Enter')ownerSignInPassword()">
+      </div>
+      <button onclick="ownerSignInPassword()" id="owner-signin-btn"
+        style="width:100%;padding:13px;border-radius:10px;background:linear-gradient(135deg,var(--amber),var(--accent));color:#fff;font-size:14px;font-weight:600;border:none;cursor:pointer;font-family:'Outfit',sans-serif;box-shadow:0 4px 16px rgba(224,142,66,0.3);transition:all 0.2s;">
+        Sign In as Owner ⚡
+      </button>
+    </div>
+
+    <!-- ERROR & SUCCESS MESSAGES -->
+    <p id="login-error" style="font-size:12px;color:var(--accent);font-weight:600;min-height:18px;margin-top:14px;display:none;line-height:1.4;"></p>
+    <p id="login-success" style="font-size:13px;color:var(--sage);background:var(--sage-dim);border:1px solid rgba(45,106,79,0.3);padding:12px;border-radius:10px;font-weight:600;margin-top:14px;display:none;line-height:1.5;"></p>
+
     <p style="font-size:11px;color:var(--text-faint);margin-top:16px;">🔒 Private & Restricted Access • Whitelisted Emails Only</p>
   </div>
 </div>
@@ -2527,11 +2561,66 @@ async function sendMagicLink() {
       succEl.style.display = 'block';
     })
     .catch(err => {
-      btn.textContent = 'Send Magic Login Link ✉️';
-      btn.disabled = false;
-      errEl.textContent = 'Failed to send login link: ' + err.message;
-      errEl.style.display = 'block';
-    });
+function switchLoginTab(tab) {
+  const customerPanel = document.getElementById('login-panel-customer');
+  const ownerPanel = document.getElementById('login-panel-owner');
+  const customerBtn = document.getElementById('tab-btn-customer');
+  const ownerBtn = document.getElementById('tab-btn-owner');
+  const errEl = document.getElementById('login-error');
+  const succEl = document.getElementById('login-success');
+
+  if (errEl) errEl.style.display = 'none';
+  if (succEl) succEl.style.display = 'none';
+
+  if (tab === 'owner') {
+    customerPanel.style.display = 'none';
+    ownerPanel.style.display = 'block';
+    customerBtn.style.background = 'transparent';
+    customerBtn.style.color = 'var(--text-muted)';
+    customerBtn.style.boxShadow = 'none';
+    ownerBtn.style.background = 'var(--surface)';
+    ownerBtn.style.color = 'var(--text)';
+    ownerBtn.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
+    setTimeout(() => document.getElementById('owner-pass')?.focus(), 100);
+  } else {
+    ownerPanel.style.display = 'none';
+    customerPanel.style.display = 'block';
+    ownerBtn.style.background = 'transparent';
+    ownerBtn.style.color = 'var(--text-muted)';
+    ownerBtn.style.boxShadow = 'none';
+    customerBtn.style.background = 'var(--surface)';
+    customerBtn.style.color = 'var(--text)';
+    customerBtn.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
+  }
+}
+
+async function ownerSignInPassword() {
+  const email = document.getElementById('owner-email').value.trim().toLowerCase();
+  const pass = document.getElementById('owner-pass').value;
+  const errEl = document.getElementById('login-error');
+  const btn = document.getElementById('owner-signin-btn');
+
+  errEl.style.display = 'none';
+
+  if (!email || !pass) {
+    errEl.textContent = 'Please enter your owner email and password.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  btn.textContent = 'Signing in…';
+  btn.disabled = true;
+
+  try {
+    await auth.signInWithEmailAndPassword(email, pass);
+  } catch(err) {
+    btn.textContent = 'Sign In as Owner ⚡';
+    btn.disabled = false;
+    errEl.textContent = (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found')
+      ? 'Incorrect owner password. Please try again.'
+      : err.message;
+    errEl.style.display = 'block';
+  }
 }
 
 // Handle completing sign-in when user opens email link
@@ -2711,14 +2800,52 @@ async function adminApproveEmailInput() {
 }
 
 // ---- INIT (via Firebase Auth) ----
+let _requestsListener = null; // track live listener so we can detach on signout
+
 auth.onAuthStateChanged(user=>{
   const loginScreen=document.getElementById('login-screen');
   const adminBtn=document.getElementById('admin-control-btn');
+  const adminBadge=document.getElementById('admin-badge');
+
+  // Detach any previous listener when auth state changes
+  if (_requestsListener) {
+    database.ref('access_requests').off('value', _requestsListener);
+    _requestsListener = null;
+  }
+
   if(user){
     currentUser=user;
     loginScreen.style.display='none';
     const isOwner = user.email && isOwnerEmail(user.email);
     if(adminBtn) adminBtn.style.display = isOwner ? 'block' : 'none';
+
+    // Live listener for access requests (fires immediately + on every change)
+    if (isOwner) {
+      let firstLoad = true;
+      _requestsListener = database.ref('access_requests').on('value', snap => {
+        const data = snap.val() || {};
+        const pending = Object.values(data).filter(r => r.status === 'pending');
+        const count = pending.length;
+
+        // Update badge
+        if (adminBadge) {
+          if (count > 0) {
+            adminBadge.textContent = count;
+            adminBadge.style.display = 'block';
+          } else {
+            adminBadge.style.display = 'none';
+          }
+        }
+
+        // Show toast on first load (if any pending) OR on new request arriving
+        if (count > 0) {
+          setTimeout(() => {
+            showToast('👑', `Access Request${count > 1 ? 's' : ''} (${count})`, `${count} user(s) waiting. Click '👑 Access Control' in sidebar to approve.`);
+          }, firstLoad ? 2000 : 500);
+        }
+        firstLoad = false;
+      }, err => console.warn('Request listener error:', err));
+    }
     
     load().then(()=>{
       applyTheme();applyViewMode();checkStreak();
@@ -2734,25 +2861,12 @@ auth.onAuthStateChanged(user=>{
           if(p==='granted')showToast('🔔','Notifications Active','Ego push notifications enabled.');
         }),3000);
       }
-      
-      // Check for pending access requests if Owner
-      if (isOwner) {
-        database.ref('access_requests').once('value').then(snap => {
-          const data = snap.val() || {};
-          const pending = Object.values(data).filter(r => r.status === 'pending');
-          if (pending.length > 0) {
-            setTimeout(() => {
-              showToast('👑', `Pending Access Requests (${pending.length})`, `${pending.length} user(s) waiting for access. Click '👑 Access Control' in sidebar to approve.`);
-            }, 2000);
-          }
-        }).catch(err => console.warn('Request check err:', err));
-      }
-
       setTimeout(()=>showToast('✨','Welcome back to GUNDU','Your personal command center is ready.'),1000);
     });
   } else {
     currentUser=null;
     if(adminBtn) adminBtn.style.display = 'none';
+    if(adminBadge) adminBadge.style.display = 'none';
     loginScreen.style.display='flex';
     const btn=document.getElementById('signin-btn');
     if(btn){btn.style.display='block';btn.textContent='Send Magic Login Link ✉️';btn.disabled=false;}
